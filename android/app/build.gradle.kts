@@ -6,6 +6,7 @@ plugins {
 }
 
 android {
+    ndkVersion = "27.0.12077973"
     namespace = "workai.pl.test_plan_manager_app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion

@@ -1,42 +1,26 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
-import 'database/data.dart'; // Twój plik z AppDatabase
+import 'package:test_plan_manager_app/features/test_plan_list/presentation/pages/test_plan_list_page.dart';
 
-void main() async {
+import 'core/error/failures.dart';
+import 'dependency_injection/service_locator.dart' as di;
+import 'features/test_plan_list/domain/entities/test_plan.dart';
+import 'features/test_plan_list/domain/usecases/get_all_test_plans.dart';
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final db = AppDatabase();
-  runApp(MyApp(database: db));
+  await di.init();
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final AppDatabase database;
-  const MyApp({super.key, required this.database});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Drift Inspector Demo',
-      home: HomeScreen(database: database),
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  final AppDatabase database;
-  const HomeScreen({super.key, required this.database});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Test Plan Manager')),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () async {
-            final count = await (database.select(database.users)).get();
-            debugPrint('Users in db: ${count.length}');
-          },
-          child: const Text('Ping DB'),
-        ),
-      ),
+      title: 'Test Plan Manager',
+      home: TestPlanListPage(),
     );
   }
 }

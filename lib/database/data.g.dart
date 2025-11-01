@@ -2155,145 +2155,6 @@ class CommentsCompanion extends UpdateCompanion<Comment> {
   }
 }
 
-class TestPlanWithOwnerViewData extends DataClass {
-  final String id;
-  final String? planName;
-  final String? ownerName;
-  const TestPlanWithOwnerViewData({
-    required this.id,
-    this.planName,
-    this.ownerName,
-  });
-  factory TestPlanWithOwnerViewData.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return TestPlanWithOwnerViewData(
-      id: serializer.fromJson<String>(json['id']),
-      planName: serializer.fromJson<String?>(json['planName']),
-      ownerName: serializer.fromJson<String?>(json['ownerName']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'planName': serializer.toJson<String?>(planName),
-      'ownerName': serializer.toJson<String?>(ownerName),
-    };
-  }
-
-  TestPlanWithOwnerViewData copyWith({
-    String? id,
-    Value<String?> planName = const Value.absent(),
-    Value<String?> ownerName = const Value.absent(),
-  }) => TestPlanWithOwnerViewData(
-    id: id ?? this.id,
-    planName: planName.present ? planName.value : this.planName,
-    ownerName: ownerName.present ? ownerName.value : this.ownerName,
-  );
-  @override
-  String toString() {
-    return (StringBuffer('TestPlanWithOwnerViewData(')
-          ..write('id: $id, ')
-          ..write('planName: $planName, ')
-          ..write('ownerName: $ownerName')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, planName, ownerName);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is TestPlanWithOwnerViewData &&
-          other.id == this.id &&
-          other.planName == this.planName &&
-          other.ownerName == this.ownerName);
-}
-
-class $TestPlanWithOwnerViewView
-    extends ViewInfo<$TestPlanWithOwnerViewView, TestPlanWithOwnerViewData>
-    implements HasResultSet {
-  final String? _alias;
-  @override
-  final _$AppDatabase attachedDatabase;
-  $TestPlanWithOwnerViewView(this.attachedDatabase, [this._alias]);
-  $TestPlansTable get testPlans => attachedDatabase.testPlans.createAlias('t0');
-  $UsersTable get users => attachedDatabase.users.createAlias('t1');
-  @override
-  List<GeneratedColumn> get $columns => [id, planName, ownerName];
-  @override
-  String get aliasedName => _alias ?? entityName;
-  @override
-  String get entityName => 'testPlanWithOwnerView';
-  @override
-  Map<SqlDialect, String>? get createViewStatements => null;
-  @override
-  $TestPlanWithOwnerViewView get asDslTable => this;
-  @override
-  TestPlanWithOwnerViewData map(
-    Map<String, dynamic> data, {
-    String? tablePrefix,
-  }) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return TestPlanWithOwnerViewData(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}id'],
-          )!,
-      planName: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}plan_name'],
-      ),
-      ownerName: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}owner_name'],
-      ),
-    );
-  }
-
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    generatedAs: GeneratedAs(testPlans.id, false),
-    type: DriftSqlType.string,
-  );
-  late final GeneratedColumn<String> planName = GeneratedColumn<String>(
-    'plan_name',
-    aliasedName,
-    true,
-    generatedAs: GeneratedAs(testPlans.name, false),
-    type: DriftSqlType.string,
-  );
-  late final GeneratedColumn<String> ownerName = GeneratedColumn<String>(
-    'owner_name',
-    aliasedName,
-    true,
-    generatedAs: GeneratedAs(
-      users.displayName ?? const Constant('Brak'),
-      false,
-    ),
-    type: DriftSqlType.string,
-  );
-  @override
-  $TestPlanWithOwnerViewView createAlias(String alias) {
-    return $TestPlanWithOwnerViewView(attachedDatabase, alias);
-  }
-
-  @override
-  Query? get query => (attachedDatabase.selectOnly(testPlans)..addColumns(
-    $columns,
-  )).join([leftOuterJoin(users, users.id.equalsExp(testPlans.ownerUserId))]);
-  @override
-  Set<String> get readTables => const {'test_plans', 'users'};
-}
-
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2302,8 +2163,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $TestCasesTable testCases = $TestCasesTable(this);
   late final $TestStepsTable testSteps = $TestStepsTable(this);
   late final $CommentsTable comments = $CommentsTable(this);
-  late final $TestPlanWithOwnerViewView testPlanWithOwnerView =
-      $TestPlanWithOwnerViewView(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2314,7 +2173,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     testCases,
     testSteps,
     comments,
-    testPlanWithOwnerView,
   ];
 }
 

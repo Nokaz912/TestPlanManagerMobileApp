@@ -3,7 +3,6 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-
 part 'data.g.dart';
 
 // ------------------- TABLES -------------------
@@ -72,29 +71,6 @@ class Comments extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-// ------------------- VIEW -------------------
-
-@DriftView(name: 'testPlanWithOwnerView')
-abstract class TestPlanWithOwnerView extends View {
-  TestPlans get testPlans;
-  Users get users;
-
-  Expression<String> get planName => testPlans.name;
-  Expression<String> get ownerName =>
-      users.displayName ?? const Constant('Brak');
-
-  @override
-  Query as() => select([
-    testPlans.id,
-    planName,
-    ownerName,
-  ]).from(testPlans).join([
-    leftOuterJoin(users, users.id.equalsExp(testPlans.ownerUserId)),
-  ]);
-}
-
-// ------------------- DATABASE -------------------
-
 @DriftDatabase(
   tables: [
     Users,
@@ -102,9 +78,6 @@ abstract class TestPlanWithOwnerView extends View {
     TestCases,
     TestSteps,
     Comments,
-  ],
-  views: [
-    TestPlanWithOwnerView,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -115,14 +88,50 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (m) async => await m.createAll(),
+    onCreate: (m) async {
+      await m.createAll();
+      await seedInitialData();
+    },
   );
+  Future<void> seedInitialData() async {
+    final existingUsers = await (select(users)..limit(1)).get();
+    if (existingUsers.isNotEmpty) {
+      print('✅ Seed pominięty – dane już istnieją');
+      return;
+    }
+    await batch((b) {
+      b.insert(
+        users,
+        UsersCompanion.insert(
+          id: 'user_1',
+          displayName: const Value('Admin'),
+          email: const Value('admin@example.com'),
+          lastModifiedUtc: Value(DateTime.now().toUtc()),
+        ),
+        mode: InsertMode.insertOrIgnore,
+      );
 
-  Future<List<TestPlan>> getAllTestPlans() {
-    return select(testPlans).get();
-  }
-  Stream<List<TestPlan>> watchAllTestPlans() {
-    return select(testPlans).watch();
+      b.insertAll(
+        testPlans,
+        [
+          TestPlansCompanion.insert(
+            id: 'plan_1',
+            name: 'Test plan Alpha',
+            description: const Value('Pierwszy przykładowy plan testowy'),
+            ownerUserId: const Value('user_1'),
+            lastModifiedUtc: Value(DateTime.now().toUtc()),
+          ),
+          TestPlansCompanion.insert(
+            id: 'plan_2',
+            name: 'Test plan Beta',
+            description: const Value('Drugi przykładowy plan testowy'),
+            ownerUserId: const Value('user_1'),
+            lastModifiedUtc: Value(DateTime.now().toUtc()),
+          ),
+        ],
+        mode: InsertMode.insertOrIgnore,
+      );
+    });
   }
 }
 
