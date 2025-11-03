@@ -13,3 +13,9 @@ class GetAllTestPlansEvent extends TestPlanEvent {
   @override
   List<Object?> get props => [];
 }
+
+class GetTestPlansForModuleEvent extends TestPlanEvent {
+  final String moduleId;
+
+  const GetTestPlansForModuleEvent(this.moduleId);
+}

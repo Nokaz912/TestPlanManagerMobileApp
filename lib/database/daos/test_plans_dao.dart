@@ -9,12 +9,13 @@ class TestPlansDao extends DatabaseAccessor<AppDatabase> with _$TestPlansDaoMixi
 
   TestPlansDao(this.db) : super(db);
 
-  // Zwraca wszystkie plany
   Future<List<TestPlan>> getAll() => select(db.testPlans).get();
 
-  // Stream do obserwacji zmian
   Stream<List<TestPlan>> watchAll() => select(db.testPlans).watch();
 
-  // Wstawianie nowego planu
   Future<void> insertPlan(TestPlansCompanion plan) => into(db.testPlans).insert(plan);
+
+  Future<List<TestPlan>> getPlansByModuleId(String moduleId) {
+    return (select(testPlans)..where((tbl) => tbl.moduleId.equals(moduleId))).get();
+  }
 }

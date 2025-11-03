@@ -5,4 +5,5 @@ import 'package:dartz/dartz.dart';
 
 abstract class TestPlanRepository {
   Future<Either<Failure, List<TestPlanEntity>>> getAllPlans();
+  Future<Either<Failure, List<TestPlanEntity>>> getPlansForModule(String moduleId);
 }

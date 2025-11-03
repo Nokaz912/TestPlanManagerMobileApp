@@ -37,6 +37,73 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _userPrincipalNameMeta = const VerificationMeta(
+    'userPrincipalName',
+  );
+  @override
+  late final GeneratedColumn<String> userPrincipalName =
+      GeneratedColumn<String>(
+        'user_principal_name',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _loginNameMeta = const VerificationMeta(
+    'loginName',
+  );
+  @override
+  late final GeneratedColumn<String> loginName = GeneratedColumn<String>(
+    'login_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _jobTitleMeta = const VerificationMeta(
+    'jobTitle',
+  );
+  @override
+  late final GeneratedColumn<String> jobTitle = GeneratedColumn<String>(
+    'job_title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _departmentMeta = const VerificationMeta(
+    'department',
+  );
+  @override
+  late final GeneratedColumn<String> department = GeneratedColumn<String>(
+    'department',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pictureUrlMeta = const VerificationMeta(
+    'pictureUrl',
+  );
+  @override
+  late final GeneratedColumn<String> pictureUrl = GeneratedColumn<String>(
+    'picture_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtUtcMeta = const VerificationMeta(
+    'createdAtUtc',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAtUtc = GeneratedColumn<DateTime>(
+    'created_at_utc',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _lastModifiedUtcMeta = const VerificationMeta(
     'lastModifiedUtc',
   );
@@ -54,6 +121,12 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     id,
     displayName,
     email,
+    userPrincipalName,
+    loginName,
+    jobTitle,
+    department,
+    pictureUrl,
+    createdAtUtc,
     lastModifiedUtc,
   ];
   @override
@@ -88,6 +161,48 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         email.isAcceptableOrUnknown(data['email']!, _emailMeta),
       );
     }
+    if (data.containsKey('user_principal_name')) {
+      context.handle(
+        _userPrincipalNameMeta,
+        userPrincipalName.isAcceptableOrUnknown(
+          data['user_principal_name']!,
+          _userPrincipalNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('login_name')) {
+      context.handle(
+        _loginNameMeta,
+        loginName.isAcceptableOrUnknown(data['login_name']!, _loginNameMeta),
+      );
+    }
+    if (data.containsKey('job_title')) {
+      context.handle(
+        _jobTitleMeta,
+        jobTitle.isAcceptableOrUnknown(data['job_title']!, _jobTitleMeta),
+      );
+    }
+    if (data.containsKey('department')) {
+      context.handle(
+        _departmentMeta,
+        department.isAcceptableOrUnknown(data['department']!, _departmentMeta),
+      );
+    }
+    if (data.containsKey('picture_url')) {
+      context.handle(
+        _pictureUrlMeta,
+        pictureUrl.isAcceptableOrUnknown(data['picture_url']!, _pictureUrlMeta),
+      );
+    }
+    if (data.containsKey('created_at_utc')) {
+      context.handle(
+        _createdAtUtcMeta,
+        createdAtUtc.isAcceptableOrUnknown(
+          data['created_at_utc']!,
+          _createdAtUtcMeta,
+        ),
+      );
+    }
     if (data.containsKey('last_modified_utc')) {
       context.handle(
         _lastModifiedUtcMeta,
@@ -119,6 +234,30 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         DriftSqlType.string,
         data['${effectivePrefix}email'],
       ),
+      userPrincipalName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_principal_name'],
+      ),
+      loginName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}login_name'],
+      ),
+      jobTitle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}job_title'],
+      ),
+      department: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}department'],
+      ),
+      pictureUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}picture_url'],
+      ),
+      createdAtUtc: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at_utc'],
+      ),
       lastModifiedUtc: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_modified_utc'],
@@ -136,11 +275,23 @@ class User extends DataClass implements Insertable<User> {
   final String id;
   final String? displayName;
   final String? email;
+  final String? userPrincipalName;
+  final String? loginName;
+  final String? jobTitle;
+  final String? department;
+  final String? pictureUrl;
+  final DateTime? createdAtUtc;
   final DateTime? lastModifiedUtc;
   const User({
     required this.id,
     this.displayName,
     this.email,
+    this.userPrincipalName,
+    this.loginName,
+    this.jobTitle,
+    this.department,
+    this.pictureUrl,
+    this.createdAtUtc,
     this.lastModifiedUtc,
   });
   @override
@@ -152,6 +303,24 @@ class User extends DataClass implements Insertable<User> {
     }
     if (!nullToAbsent || email != null) {
       map['email'] = Variable<String>(email);
+    }
+    if (!nullToAbsent || userPrincipalName != null) {
+      map['user_principal_name'] = Variable<String>(userPrincipalName);
+    }
+    if (!nullToAbsent || loginName != null) {
+      map['login_name'] = Variable<String>(loginName);
+    }
+    if (!nullToAbsent || jobTitle != null) {
+      map['job_title'] = Variable<String>(jobTitle);
+    }
+    if (!nullToAbsent || department != null) {
+      map['department'] = Variable<String>(department);
+    }
+    if (!nullToAbsent || pictureUrl != null) {
+      map['picture_url'] = Variable<String>(pictureUrl);
+    }
+    if (!nullToAbsent || createdAtUtc != null) {
+      map['created_at_utc'] = Variable<DateTime>(createdAtUtc);
     }
     if (!nullToAbsent || lastModifiedUtc != null) {
       map['last_modified_utc'] = Variable<DateTime>(lastModifiedUtc);
@@ -168,6 +337,30 @@ class User extends DataClass implements Insertable<User> {
               : Value(displayName),
       email:
           email == null && nullToAbsent ? const Value.absent() : Value(email),
+      userPrincipalName:
+          userPrincipalName == null && nullToAbsent
+              ? const Value.absent()
+              : Value(userPrincipalName),
+      loginName:
+          loginName == null && nullToAbsent
+              ? const Value.absent()
+              : Value(loginName),
+      jobTitle:
+          jobTitle == null && nullToAbsent
+              ? const Value.absent()
+              : Value(jobTitle),
+      department:
+          department == null && nullToAbsent
+              ? const Value.absent()
+              : Value(department),
+      pictureUrl:
+          pictureUrl == null && nullToAbsent
+              ? const Value.absent()
+              : Value(pictureUrl),
+      createdAtUtc:
+          createdAtUtc == null && nullToAbsent
+              ? const Value.absent()
+              : Value(createdAtUtc),
       lastModifiedUtc:
           lastModifiedUtc == null && nullToAbsent
               ? const Value.absent()
@@ -184,6 +377,14 @@ class User extends DataClass implements Insertable<User> {
       id: serializer.fromJson<String>(json['id']),
       displayName: serializer.fromJson<String?>(json['displayName']),
       email: serializer.fromJson<String?>(json['email']),
+      userPrincipalName: serializer.fromJson<String?>(
+        json['userPrincipalName'],
+      ),
+      loginName: serializer.fromJson<String?>(json['loginName']),
+      jobTitle: serializer.fromJson<String?>(json['jobTitle']),
+      department: serializer.fromJson<String?>(json['department']),
+      pictureUrl: serializer.fromJson<String?>(json['pictureUrl']),
+      createdAtUtc: serializer.fromJson<DateTime?>(json['createdAtUtc']),
       lastModifiedUtc: serializer.fromJson<DateTime?>(json['lastModifiedUtc']),
     );
   }
@@ -194,6 +395,12 @@ class User extends DataClass implements Insertable<User> {
       'id': serializer.toJson<String>(id),
       'displayName': serializer.toJson<String?>(displayName),
       'email': serializer.toJson<String?>(email),
+      'userPrincipalName': serializer.toJson<String?>(userPrincipalName),
+      'loginName': serializer.toJson<String?>(loginName),
+      'jobTitle': serializer.toJson<String?>(jobTitle),
+      'department': serializer.toJson<String?>(department),
+      'pictureUrl': serializer.toJson<String?>(pictureUrl),
+      'createdAtUtc': serializer.toJson<DateTime?>(createdAtUtc),
       'lastModifiedUtc': serializer.toJson<DateTime?>(lastModifiedUtc),
     };
   }
@@ -202,11 +409,26 @@ class User extends DataClass implements Insertable<User> {
     String? id,
     Value<String?> displayName = const Value.absent(),
     Value<String?> email = const Value.absent(),
+    Value<String?> userPrincipalName = const Value.absent(),
+    Value<String?> loginName = const Value.absent(),
+    Value<String?> jobTitle = const Value.absent(),
+    Value<String?> department = const Value.absent(),
+    Value<String?> pictureUrl = const Value.absent(),
+    Value<DateTime?> createdAtUtc = const Value.absent(),
     Value<DateTime?> lastModifiedUtc = const Value.absent(),
   }) => User(
     id: id ?? this.id,
     displayName: displayName.present ? displayName.value : this.displayName,
     email: email.present ? email.value : this.email,
+    userPrincipalName:
+        userPrincipalName.present
+            ? userPrincipalName.value
+            : this.userPrincipalName,
+    loginName: loginName.present ? loginName.value : this.loginName,
+    jobTitle: jobTitle.present ? jobTitle.value : this.jobTitle,
+    department: department.present ? department.value : this.department,
+    pictureUrl: pictureUrl.present ? pictureUrl.value : this.pictureUrl,
+    createdAtUtc: createdAtUtc.present ? createdAtUtc.value : this.createdAtUtc,
     lastModifiedUtc:
         lastModifiedUtc.present ? lastModifiedUtc.value : this.lastModifiedUtc,
   );
@@ -216,6 +438,20 @@ class User extends DataClass implements Insertable<User> {
       displayName:
           data.displayName.present ? data.displayName.value : this.displayName,
       email: data.email.present ? data.email.value : this.email,
+      userPrincipalName:
+          data.userPrincipalName.present
+              ? data.userPrincipalName.value
+              : this.userPrincipalName,
+      loginName: data.loginName.present ? data.loginName.value : this.loginName,
+      jobTitle: data.jobTitle.present ? data.jobTitle.value : this.jobTitle,
+      department:
+          data.department.present ? data.department.value : this.department,
+      pictureUrl:
+          data.pictureUrl.present ? data.pictureUrl.value : this.pictureUrl,
+      createdAtUtc:
+          data.createdAtUtc.present
+              ? data.createdAtUtc.value
+              : this.createdAtUtc,
       lastModifiedUtc:
           data.lastModifiedUtc.present
               ? data.lastModifiedUtc.value
@@ -229,13 +465,30 @@ class User extends DataClass implements Insertable<User> {
           ..write('id: $id, ')
           ..write('displayName: $displayName, ')
           ..write('email: $email, ')
+          ..write('userPrincipalName: $userPrincipalName, ')
+          ..write('loginName: $loginName, ')
+          ..write('jobTitle: $jobTitle, ')
+          ..write('department: $department, ')
+          ..write('pictureUrl: $pictureUrl, ')
+          ..write('createdAtUtc: $createdAtUtc, ')
           ..write('lastModifiedUtc: $lastModifiedUtc')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, displayName, email, lastModifiedUtc);
+  int get hashCode => Object.hash(
+    id,
+    displayName,
+    email,
+    userPrincipalName,
+    loginName,
+    jobTitle,
+    department,
+    pictureUrl,
+    createdAtUtc,
+    lastModifiedUtc,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -243,6 +496,12 @@ class User extends DataClass implements Insertable<User> {
           other.id == this.id &&
           other.displayName == this.displayName &&
           other.email == this.email &&
+          other.userPrincipalName == this.userPrincipalName &&
+          other.loginName == this.loginName &&
+          other.jobTitle == this.jobTitle &&
+          other.department == this.department &&
+          other.pictureUrl == this.pictureUrl &&
+          other.createdAtUtc == this.createdAtUtc &&
           other.lastModifiedUtc == this.lastModifiedUtc);
 }
 
@@ -250,12 +509,24 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<String> id;
   final Value<String?> displayName;
   final Value<String?> email;
+  final Value<String?> userPrincipalName;
+  final Value<String?> loginName;
+  final Value<String?> jobTitle;
+  final Value<String?> department;
+  final Value<String?> pictureUrl;
+  final Value<DateTime?> createdAtUtc;
   final Value<DateTime?> lastModifiedUtc;
   final Value<int> rowid;
   const UsersCompanion({
     this.id = const Value.absent(),
     this.displayName = const Value.absent(),
     this.email = const Value.absent(),
+    this.userPrincipalName = const Value.absent(),
+    this.loginName = const Value.absent(),
+    this.jobTitle = const Value.absent(),
+    this.department = const Value.absent(),
+    this.pictureUrl = const Value.absent(),
+    this.createdAtUtc = const Value.absent(),
     this.lastModifiedUtc = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -263,6 +534,12 @@ class UsersCompanion extends UpdateCompanion<User> {
     required String id,
     this.displayName = const Value.absent(),
     this.email = const Value.absent(),
+    this.userPrincipalName = const Value.absent(),
+    this.loginName = const Value.absent(),
+    this.jobTitle = const Value.absent(),
+    this.department = const Value.absent(),
+    this.pictureUrl = const Value.absent(),
+    this.createdAtUtc = const Value.absent(),
     this.lastModifiedUtc = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id);
@@ -270,6 +547,12 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<String>? id,
     Expression<String>? displayName,
     Expression<String>? email,
+    Expression<String>? userPrincipalName,
+    Expression<String>? loginName,
+    Expression<String>? jobTitle,
+    Expression<String>? department,
+    Expression<String>? pictureUrl,
+    Expression<DateTime>? createdAtUtc,
     Expression<DateTime>? lastModifiedUtc,
     Expression<int>? rowid,
   }) {
@@ -277,6 +560,12 @@ class UsersCompanion extends UpdateCompanion<User> {
       if (id != null) 'id': id,
       if (displayName != null) 'display_name': displayName,
       if (email != null) 'email': email,
+      if (userPrincipalName != null) 'user_principal_name': userPrincipalName,
+      if (loginName != null) 'login_name': loginName,
+      if (jobTitle != null) 'job_title': jobTitle,
+      if (department != null) 'department': department,
+      if (pictureUrl != null) 'picture_url': pictureUrl,
+      if (createdAtUtc != null) 'created_at_utc': createdAtUtc,
       if (lastModifiedUtc != null) 'last_modified_utc': lastModifiedUtc,
       if (rowid != null) 'rowid': rowid,
     });
@@ -286,6 +575,12 @@ class UsersCompanion extends UpdateCompanion<User> {
     Value<String>? id,
     Value<String?>? displayName,
     Value<String?>? email,
+    Value<String?>? userPrincipalName,
+    Value<String?>? loginName,
+    Value<String?>? jobTitle,
+    Value<String?>? department,
+    Value<String?>? pictureUrl,
+    Value<DateTime?>? createdAtUtc,
     Value<DateTime?>? lastModifiedUtc,
     Value<int>? rowid,
   }) {
@@ -293,6 +588,12 @@ class UsersCompanion extends UpdateCompanion<User> {
       id: id ?? this.id,
       displayName: displayName ?? this.displayName,
       email: email ?? this.email,
+      userPrincipalName: userPrincipalName ?? this.userPrincipalName,
+      loginName: loginName ?? this.loginName,
+      jobTitle: jobTitle ?? this.jobTitle,
+      department: department ?? this.department,
+      pictureUrl: pictureUrl ?? this.pictureUrl,
+      createdAtUtc: createdAtUtc ?? this.createdAtUtc,
       lastModifiedUtc: lastModifiedUtc ?? this.lastModifiedUtc,
       rowid: rowid ?? this.rowid,
     );
@@ -310,6 +611,24 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (email.present) {
       map['email'] = Variable<String>(email.value);
     }
+    if (userPrincipalName.present) {
+      map['user_principal_name'] = Variable<String>(userPrincipalName.value);
+    }
+    if (loginName.present) {
+      map['login_name'] = Variable<String>(loginName.value);
+    }
+    if (jobTitle.present) {
+      map['job_title'] = Variable<String>(jobTitle.value);
+    }
+    if (department.present) {
+      map['department'] = Variable<String>(department.value);
+    }
+    if (pictureUrl.present) {
+      map['picture_url'] = Variable<String>(pictureUrl.value);
+    }
+    if (createdAtUtc.present) {
+      map['created_at_utc'] = Variable<DateTime>(createdAtUtc.value);
+    }
     if (lastModifiedUtc.present) {
       map['last_modified_utc'] = Variable<DateTime>(lastModifiedUtc.value);
     }
@@ -325,7 +644,720 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('id: $id, ')
           ..write('displayName: $displayName, ')
           ..write('email: $email, ')
+          ..write('userPrincipalName: $userPrincipalName, ')
+          ..write('loginName: $loginName, ')
+          ..write('jobTitle: $jobTitle, ')
+          ..write('department: $department, ')
+          ..write('pictureUrl: $pictureUrl, ')
+          ..write('createdAtUtc: $createdAtUtc, ')
           ..write('lastModifiedUtc: $lastModifiedUtc, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ProjectsTable extends Projects with TableInfo<$ProjectsTable, Project> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ProjectsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtUtcMeta = const VerificationMeta(
+    'createdAtUtc',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAtUtc = GeneratedColumn<DateTime>(
+    'created_at_utc',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, description, createdAtUtc];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'projects';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Project> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at_utc')) {
+      context.handle(
+        _createdAtUtcMeta,
+        createdAtUtc.isAcceptableOrUnknown(
+          data['created_at_utc']!,
+          _createdAtUtcMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Project map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Project(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}id'],
+          )!,
+      name:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}name'],
+          )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+      createdAtUtc: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at_utc'],
+      ),
+    );
+  }
+
+  @override
+  $ProjectsTable createAlias(String alias) {
+    return $ProjectsTable(attachedDatabase, alias);
+  }
+}
+
+class Project extends DataClass implements Insertable<Project> {
+  final String id;
+  final String name;
+  final String? description;
+  final DateTime? createdAtUtc;
+  const Project({
+    required this.id,
+    required this.name,
+    this.description,
+    this.createdAtUtc,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    if (!nullToAbsent || createdAtUtc != null) {
+      map['created_at_utc'] = Variable<DateTime>(createdAtUtc);
+    }
+    return map;
+  }
+
+  ProjectsCompanion toCompanion(bool nullToAbsent) {
+    return ProjectsCompanion(
+      id: Value(id),
+      name: Value(name),
+      description:
+          description == null && nullToAbsent
+              ? const Value.absent()
+              : Value(description),
+      createdAtUtc:
+          createdAtUtc == null && nullToAbsent
+              ? const Value.absent()
+              : Value(createdAtUtc),
+    );
+  }
+
+  factory Project.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Project(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      description: serializer.fromJson<String?>(json['description']),
+      createdAtUtc: serializer.fromJson<DateTime?>(json['createdAtUtc']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'description': serializer.toJson<String?>(description),
+      'createdAtUtc': serializer.toJson<DateTime?>(createdAtUtc),
+    };
+  }
+
+  Project copyWith({
+    String? id,
+    String? name,
+    Value<String?> description = const Value.absent(),
+    Value<DateTime?> createdAtUtc = const Value.absent(),
+  }) => Project(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    description: description.present ? description.value : this.description,
+    createdAtUtc: createdAtUtc.present ? createdAtUtc.value : this.createdAtUtc,
+  );
+  Project copyWithCompanion(ProjectsCompanion data) {
+    return Project(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      description:
+          data.description.present ? data.description.value : this.description,
+      createdAtUtc:
+          data.createdAtUtc.present
+              ? data.createdAtUtc.value
+              : this.createdAtUtc,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Project(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('createdAtUtc: $createdAtUtc')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, description, createdAtUtc);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Project &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.description == this.description &&
+          other.createdAtUtc == this.createdAtUtc);
+}
+
+class ProjectsCompanion extends UpdateCompanion<Project> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String?> description;
+  final Value<DateTime?> createdAtUtc;
+  final Value<int> rowid;
+  const ProjectsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.description = const Value.absent(),
+    this.createdAtUtc = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ProjectsCompanion.insert({
+    required String id,
+    required String name,
+    this.description = const Value.absent(),
+    this.createdAtUtc = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name);
+  static Insertable<Project> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? description,
+    Expression<DateTime>? createdAtUtc,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (description != null) 'description': description,
+      if (createdAtUtc != null) 'created_at_utc': createdAtUtc,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ProjectsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<String?>? description,
+    Value<DateTime?>? createdAtUtc,
+    Value<int>? rowid,
+  }) {
+    return ProjectsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      createdAtUtc: createdAtUtc ?? this.createdAtUtc,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (createdAtUtc.present) {
+      map['created_at_utc'] = Variable<DateTime>(createdAtUtc.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProjectsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('createdAtUtc: $createdAtUtc, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ModulesTable extends Modules with TableInfo<$ModulesTable, Module> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ModulesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES projects (id)',
+    ),
+  );
+  static const VerificationMeta _parentModuleIdMeta = const VerificationMeta(
+    'parentModuleId',
+  );
+  @override
+  late final GeneratedColumn<String> parentModuleId = GeneratedColumn<String>(
+    'parent_module_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES modules (id)',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    description,
+    projectId,
+    parentModuleId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'modules';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Module> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('parent_module_id')) {
+      context.handle(
+        _parentModuleIdMeta,
+        parentModuleId.isAcceptableOrUnknown(
+          data['parent_module_id']!,
+          _parentModuleIdMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Module map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Module(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}id'],
+          )!,
+      name:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}name'],
+          )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+      projectId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}project_id'],
+          )!,
+      parentModuleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}parent_module_id'],
+      ),
+    );
+  }
+
+  @override
+  $ModulesTable createAlias(String alias) {
+    return $ModulesTable(attachedDatabase, alias);
+  }
+}
+
+class Module extends DataClass implements Insertable<Module> {
+  final String id;
+  final String name;
+  final String? description;
+  final String projectId;
+  final String? parentModuleId;
+  const Module({
+    required this.id,
+    required this.name,
+    this.description,
+    required this.projectId,
+    this.parentModuleId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    map['project_id'] = Variable<String>(projectId);
+    if (!nullToAbsent || parentModuleId != null) {
+      map['parent_module_id'] = Variable<String>(parentModuleId);
+    }
+    return map;
+  }
+
+  ModulesCompanion toCompanion(bool nullToAbsent) {
+    return ModulesCompanion(
+      id: Value(id),
+      name: Value(name),
+      description:
+          description == null && nullToAbsent
+              ? const Value.absent()
+              : Value(description),
+      projectId: Value(projectId),
+      parentModuleId:
+          parentModuleId == null && nullToAbsent
+              ? const Value.absent()
+              : Value(parentModuleId),
+    );
+  }
+
+  factory Module.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Module(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      description: serializer.fromJson<String?>(json['description']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      parentModuleId: serializer.fromJson<String?>(json['parentModuleId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'description': serializer.toJson<String?>(description),
+      'projectId': serializer.toJson<String>(projectId),
+      'parentModuleId': serializer.toJson<String?>(parentModuleId),
+    };
+  }
+
+  Module copyWith({
+    String? id,
+    String? name,
+    Value<String?> description = const Value.absent(),
+    String? projectId,
+    Value<String?> parentModuleId = const Value.absent(),
+  }) => Module(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    description: description.present ? description.value : this.description,
+    projectId: projectId ?? this.projectId,
+    parentModuleId:
+        parentModuleId.present ? parentModuleId.value : this.parentModuleId,
+  );
+  Module copyWithCompanion(ModulesCompanion data) {
+    return Module(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      description:
+          data.description.present ? data.description.value : this.description,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      parentModuleId:
+          data.parentModuleId.present
+              ? data.parentModuleId.value
+              : this.parentModuleId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Module(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('projectId: $projectId, ')
+          ..write('parentModuleId: $parentModuleId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, description, projectId, parentModuleId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Module &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.description == this.description &&
+          other.projectId == this.projectId &&
+          other.parentModuleId == this.parentModuleId);
+}
+
+class ModulesCompanion extends UpdateCompanion<Module> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String?> description;
+  final Value<String> projectId;
+  final Value<String?> parentModuleId;
+  final Value<int> rowid;
+  const ModulesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.description = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.parentModuleId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ModulesCompanion.insert({
+    required String id,
+    required String name,
+    this.description = const Value.absent(),
+    required String projectId,
+    this.parentModuleId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name),
+       projectId = Value(projectId);
+  static Insertable<Module> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? description,
+    Expression<String>? projectId,
+    Expression<String>? parentModuleId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (description != null) 'description': description,
+      if (projectId != null) 'project_id': projectId,
+      if (parentModuleId != null) 'parent_module_id': parentModuleId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ModulesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<String?>? description,
+    Value<String>? projectId,
+    Value<String?>? parentModuleId,
+    Value<int>? rowid,
+  }) {
+    return ModulesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      projectId: projectId ?? this.projectId,
+      parentModuleId: parentModuleId ?? this.parentModuleId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (parentModuleId.present) {
+      map['parent_module_id'] = Variable<String>(parentModuleId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ModulesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('projectId: $projectId, ')
+          ..write('parentModuleId: $parentModuleId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -366,6 +1398,20 @@ class $TestPlansTable extends TestPlans
     true,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
+  );
+  static const VerificationMeta _moduleIdMeta = const VerificationMeta(
+    'moduleId',
+  );
+  @override
+  late final GeneratedColumn<String> moduleId = GeneratedColumn<String>(
+    'module_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES modules (id)',
+    ),
   );
   static const VerificationMeta _ownerUserIdMeta = const VerificationMeta(
     'ownerUserId',
@@ -434,6 +1480,7 @@ class $TestPlansTable extends TestPlans
     id,
     name,
     description,
+    moduleId,
     ownerUserId,
     lastModifiedUtc,
     overallPassed,
@@ -473,6 +1520,14 @@ class $TestPlansTable extends TestPlans
           _descriptionMeta,
         ),
       );
+    }
+    if (data.containsKey('module_id')) {
+      context.handle(
+        _moduleIdMeta,
+        moduleId.isAcceptableOrUnknown(data['module_id']!, _moduleIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_moduleIdMeta);
     }
     if (data.containsKey('owner_user_id')) {
       context.handle(
@@ -542,6 +1597,11 @@ class $TestPlansTable extends TestPlans
         DriftSqlType.string,
         data['${effectivePrefix}description'],
       ),
+      moduleId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}module_id'],
+          )!,
       ownerUserId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}owner_user_id'],
@@ -578,6 +1638,7 @@ class TestPlan extends DataClass implements Insertable<TestPlan> {
   final String id;
   final String name;
   final String? description;
+  final String moduleId;
   final String? ownerUserId;
   final DateTime? lastModifiedUtc;
   final int overallPassed;
@@ -587,6 +1648,7 @@ class TestPlan extends DataClass implements Insertable<TestPlan> {
     required this.id,
     required this.name,
     this.description,
+    required this.moduleId,
     this.ownerUserId,
     this.lastModifiedUtc,
     required this.overallPassed,
@@ -601,6 +1663,7 @@ class TestPlan extends DataClass implements Insertable<TestPlan> {
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
     }
+    map['module_id'] = Variable<String>(moduleId);
     if (!nullToAbsent || ownerUserId != null) {
       map['owner_user_id'] = Variable<String>(ownerUserId);
     }
@@ -621,6 +1684,7 @@ class TestPlan extends DataClass implements Insertable<TestPlan> {
           description == null && nullToAbsent
               ? const Value.absent()
               : Value(description),
+      moduleId: Value(moduleId),
       ownerUserId:
           ownerUserId == null && nullToAbsent
               ? const Value.absent()
@@ -644,6 +1708,7 @@ class TestPlan extends DataClass implements Insertable<TestPlan> {
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String?>(json['description']),
+      moduleId: serializer.fromJson<String>(json['moduleId']),
       ownerUserId: serializer.fromJson<String?>(json['ownerUserId']),
       lastModifiedUtc: serializer.fromJson<DateTime?>(json['lastModifiedUtc']),
       overallPassed: serializer.fromJson<int>(json['overallPassed']),
@@ -658,6 +1723,7 @@ class TestPlan extends DataClass implements Insertable<TestPlan> {
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String?>(description),
+      'moduleId': serializer.toJson<String>(moduleId),
       'ownerUserId': serializer.toJson<String?>(ownerUserId),
       'lastModifiedUtc': serializer.toJson<DateTime?>(lastModifiedUtc),
       'overallPassed': serializer.toJson<int>(overallPassed),
@@ -670,6 +1736,7 @@ class TestPlan extends DataClass implements Insertable<TestPlan> {
     String? id,
     String? name,
     Value<String?> description = const Value.absent(),
+    String? moduleId,
     Value<String?> ownerUserId = const Value.absent(),
     Value<DateTime?> lastModifiedUtc = const Value.absent(),
     int? overallPassed,
@@ -679,6 +1746,7 @@ class TestPlan extends DataClass implements Insertable<TestPlan> {
     id: id ?? this.id,
     name: name ?? this.name,
     description: description.present ? description.value : this.description,
+    moduleId: moduleId ?? this.moduleId,
     ownerUserId: ownerUserId.present ? ownerUserId.value : this.ownerUserId,
     lastModifiedUtc:
         lastModifiedUtc.present ? lastModifiedUtc.value : this.lastModifiedUtc,
@@ -692,6 +1760,7 @@ class TestPlan extends DataClass implements Insertable<TestPlan> {
       name: data.name.present ? data.name.value : this.name,
       description:
           data.description.present ? data.description.value : this.description,
+      moduleId: data.moduleId.present ? data.moduleId.value : this.moduleId,
       ownerUserId:
           data.ownerUserId.present ? data.ownerUserId.value : this.ownerUserId,
       lastModifiedUtc:
@@ -719,6 +1788,7 @@ class TestPlan extends DataClass implements Insertable<TestPlan> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
+          ..write('moduleId: $moduleId, ')
           ..write('ownerUserId: $ownerUserId, ')
           ..write('lastModifiedUtc: $lastModifiedUtc, ')
           ..write('overallPassed: $overallPassed, ')
@@ -733,6 +1803,7 @@ class TestPlan extends DataClass implements Insertable<TestPlan> {
     id,
     name,
     description,
+    moduleId,
     ownerUserId,
     lastModifiedUtc,
     overallPassed,
@@ -746,6 +1817,7 @@ class TestPlan extends DataClass implements Insertable<TestPlan> {
           other.id == this.id &&
           other.name == this.name &&
           other.description == this.description &&
+          other.moduleId == this.moduleId &&
           other.ownerUserId == this.ownerUserId &&
           other.lastModifiedUtc == this.lastModifiedUtc &&
           other.overallPassed == this.overallPassed &&
@@ -757,6 +1829,7 @@ class TestPlansCompanion extends UpdateCompanion<TestPlan> {
   final Value<String> id;
   final Value<String> name;
   final Value<String?> description;
+  final Value<String> moduleId;
   final Value<String?> ownerUserId;
   final Value<DateTime?> lastModifiedUtc;
   final Value<int> overallPassed;
@@ -767,6 +1840,7 @@ class TestPlansCompanion extends UpdateCompanion<TestPlan> {
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
+    this.moduleId = const Value.absent(),
     this.ownerUserId = const Value.absent(),
     this.lastModifiedUtc = const Value.absent(),
     this.overallPassed = const Value.absent(),
@@ -778,6 +1852,7 @@ class TestPlansCompanion extends UpdateCompanion<TestPlan> {
     required String id,
     required String name,
     this.description = const Value.absent(),
+    required String moduleId,
     this.ownerUserId = const Value.absent(),
     this.lastModifiedUtc = const Value.absent(),
     this.overallPassed = const Value.absent(),
@@ -785,11 +1860,13 @@ class TestPlansCompanion extends UpdateCompanion<TestPlan> {
     this.overallBlocked = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
-       name = Value(name);
+       name = Value(name),
+       moduleId = Value(moduleId);
   static Insertable<TestPlan> custom({
     Expression<String>? id,
     Expression<String>? name,
     Expression<String>? description,
+    Expression<String>? moduleId,
     Expression<String>? ownerUserId,
     Expression<DateTime>? lastModifiedUtc,
     Expression<int>? overallPassed,
@@ -801,6 +1878,7 @@ class TestPlansCompanion extends UpdateCompanion<TestPlan> {
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (description != null) 'description': description,
+      if (moduleId != null) 'module_id': moduleId,
       if (ownerUserId != null) 'owner_user_id': ownerUserId,
       if (lastModifiedUtc != null) 'last_modified_utc': lastModifiedUtc,
       if (overallPassed != null) 'overall_passed': overallPassed,
@@ -814,6 +1892,7 @@ class TestPlansCompanion extends UpdateCompanion<TestPlan> {
     Value<String>? id,
     Value<String>? name,
     Value<String?>? description,
+    Value<String>? moduleId,
     Value<String?>? ownerUserId,
     Value<DateTime?>? lastModifiedUtc,
     Value<int>? overallPassed,
@@ -825,6 +1904,7 @@ class TestPlansCompanion extends UpdateCompanion<TestPlan> {
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
+      moduleId: moduleId ?? this.moduleId,
       ownerUserId: ownerUserId ?? this.ownerUserId,
       lastModifiedUtc: lastModifiedUtc ?? this.lastModifiedUtc,
       overallPassed: overallPassed ?? this.overallPassed,
@@ -845,6 +1925,9 @@ class TestPlansCompanion extends UpdateCompanion<TestPlan> {
     }
     if (description.present) {
       map['description'] = Variable<String>(description.value);
+    }
+    if (moduleId.present) {
+      map['module_id'] = Variable<String>(moduleId.value);
     }
     if (ownerUserId.present) {
       map['owner_user_id'] = Variable<String>(ownerUserId.value);
@@ -873,6 +1956,7 @@ class TestPlansCompanion extends UpdateCompanion<TestPlan> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
+          ..write('moduleId: $moduleId, ')
           ..write('ownerUserId: $ownerUserId, ')
           ..write('lastModifiedUtc: $lastModifiedUtc, ')
           ..write('overallPassed: $overallPassed, ')
@@ -966,6 +2050,20 @@ class $TestCasesTable extends TestCases
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _parentCaseIdMeta = const VerificationMeta(
+    'parentCaseId',
+  );
+  @override
+  late final GeneratedColumn<String> parentCaseId = GeneratedColumn<String>(
+    'parent_case_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES test_cases (id)',
+    ),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -975,6 +2073,7 @@ class $TestCasesTable extends TestCases
     assignedToUserId,
     expectedResult,
     lastModifiedUtc,
+    parentCaseId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1044,6 +2143,15 @@ class $TestCasesTable extends TestCases
         ),
       );
     }
+    if (data.containsKey('parent_case_id')) {
+      context.handle(
+        _parentCaseIdMeta,
+        parentCaseId.isAcceptableOrUnknown(
+          data['parent_case_id']!,
+          _parentCaseIdMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1085,6 +2193,10 @@ class $TestCasesTable extends TestCases
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_modified_utc'],
       ),
+      parentCaseId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}parent_case_id'],
+      ),
     );
   }
 
@@ -1102,6 +2214,7 @@ class TestCase extends DataClass implements Insertable<TestCase> {
   final String? assignedToUserId;
   final String? expectedResult;
   final DateTime? lastModifiedUtc;
+  final String? parentCaseId;
   const TestCase({
     required this.id,
     required this.planId,
@@ -1110,6 +2223,7 @@ class TestCase extends DataClass implements Insertable<TestCase> {
     this.assignedToUserId,
     this.expectedResult,
     this.lastModifiedUtc,
+    this.parentCaseId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1126,6 +2240,9 @@ class TestCase extends DataClass implements Insertable<TestCase> {
     }
     if (!nullToAbsent || lastModifiedUtc != null) {
       map['last_modified_utc'] = Variable<DateTime>(lastModifiedUtc);
+    }
+    if (!nullToAbsent || parentCaseId != null) {
+      map['parent_case_id'] = Variable<String>(parentCaseId);
     }
     return map;
   }
@@ -1148,6 +2265,10 @@ class TestCase extends DataClass implements Insertable<TestCase> {
           lastModifiedUtc == null && nullToAbsent
               ? const Value.absent()
               : Value(lastModifiedUtc),
+      parentCaseId:
+          parentCaseId == null && nullToAbsent
+              ? const Value.absent()
+              : Value(parentCaseId),
     );
   }
 
@@ -1164,6 +2285,7 @@ class TestCase extends DataClass implements Insertable<TestCase> {
       assignedToUserId: serializer.fromJson<String?>(json['assignedToUserId']),
       expectedResult: serializer.fromJson<String?>(json['expectedResult']),
       lastModifiedUtc: serializer.fromJson<DateTime?>(json['lastModifiedUtc']),
+      parentCaseId: serializer.fromJson<String?>(json['parentCaseId']),
     );
   }
   @override
@@ -1177,6 +2299,7 @@ class TestCase extends DataClass implements Insertable<TestCase> {
       'assignedToUserId': serializer.toJson<String?>(assignedToUserId),
       'expectedResult': serializer.toJson<String?>(expectedResult),
       'lastModifiedUtc': serializer.toJson<DateTime?>(lastModifiedUtc),
+      'parentCaseId': serializer.toJson<String?>(parentCaseId),
     };
   }
 
@@ -1188,6 +2311,7 @@ class TestCase extends DataClass implements Insertable<TestCase> {
     Value<String?> assignedToUserId = const Value.absent(),
     Value<String?> expectedResult = const Value.absent(),
     Value<DateTime?> lastModifiedUtc = const Value.absent(),
+    Value<String?> parentCaseId = const Value.absent(),
   }) => TestCase(
     id: id ?? this.id,
     planId: planId ?? this.planId,
@@ -1201,6 +2325,7 @@ class TestCase extends DataClass implements Insertable<TestCase> {
         expectedResult.present ? expectedResult.value : this.expectedResult,
     lastModifiedUtc:
         lastModifiedUtc.present ? lastModifiedUtc.value : this.lastModifiedUtc,
+    parentCaseId: parentCaseId.present ? parentCaseId.value : this.parentCaseId,
   );
   TestCase copyWithCompanion(TestCasesCompanion data) {
     return TestCase(
@@ -1220,6 +2345,10 @@ class TestCase extends DataClass implements Insertable<TestCase> {
           data.lastModifiedUtc.present
               ? data.lastModifiedUtc.value
               : this.lastModifiedUtc,
+      parentCaseId:
+          data.parentCaseId.present
+              ? data.parentCaseId.value
+              : this.parentCaseId,
     );
   }
 
@@ -1232,7 +2361,8 @@ class TestCase extends DataClass implements Insertable<TestCase> {
           ..write('status: $status, ')
           ..write('assignedToUserId: $assignedToUserId, ')
           ..write('expectedResult: $expectedResult, ')
-          ..write('lastModifiedUtc: $lastModifiedUtc')
+          ..write('lastModifiedUtc: $lastModifiedUtc, ')
+          ..write('parentCaseId: $parentCaseId')
           ..write(')'))
         .toString();
   }
@@ -1246,6 +2376,7 @@ class TestCase extends DataClass implements Insertable<TestCase> {
     assignedToUserId,
     expectedResult,
     lastModifiedUtc,
+    parentCaseId,
   );
   @override
   bool operator ==(Object other) =>
@@ -1257,7 +2388,8 @@ class TestCase extends DataClass implements Insertable<TestCase> {
           other.status == this.status &&
           other.assignedToUserId == this.assignedToUserId &&
           other.expectedResult == this.expectedResult &&
-          other.lastModifiedUtc == this.lastModifiedUtc);
+          other.lastModifiedUtc == this.lastModifiedUtc &&
+          other.parentCaseId == this.parentCaseId);
 }
 
 class TestCasesCompanion extends UpdateCompanion<TestCase> {
@@ -1268,6 +2400,7 @@ class TestCasesCompanion extends UpdateCompanion<TestCase> {
   final Value<String?> assignedToUserId;
   final Value<String?> expectedResult;
   final Value<DateTime?> lastModifiedUtc;
+  final Value<String?> parentCaseId;
   final Value<int> rowid;
   const TestCasesCompanion({
     this.id = const Value.absent(),
@@ -1277,6 +2410,7 @@ class TestCasesCompanion extends UpdateCompanion<TestCase> {
     this.assignedToUserId = const Value.absent(),
     this.expectedResult = const Value.absent(),
     this.lastModifiedUtc = const Value.absent(),
+    this.parentCaseId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TestCasesCompanion.insert({
@@ -1287,6 +2421,7 @@ class TestCasesCompanion extends UpdateCompanion<TestCase> {
     this.assignedToUserId = const Value.absent(),
     this.expectedResult = const Value.absent(),
     this.lastModifiedUtc = const Value.absent(),
+    this.parentCaseId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        planId = Value(planId),
@@ -1300,6 +2435,7 @@ class TestCasesCompanion extends UpdateCompanion<TestCase> {
     Expression<String>? assignedToUserId,
     Expression<String>? expectedResult,
     Expression<DateTime>? lastModifiedUtc,
+    Expression<String>? parentCaseId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1310,6 +2446,7 @@ class TestCasesCompanion extends UpdateCompanion<TestCase> {
       if (assignedToUserId != null) 'assigned_to_user_id': assignedToUserId,
       if (expectedResult != null) 'expected_result': expectedResult,
       if (lastModifiedUtc != null) 'last_modified_utc': lastModifiedUtc,
+      if (parentCaseId != null) 'parent_case_id': parentCaseId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1322,6 +2459,7 @@ class TestCasesCompanion extends UpdateCompanion<TestCase> {
     Value<String?>? assignedToUserId,
     Value<String?>? expectedResult,
     Value<DateTime?>? lastModifiedUtc,
+    Value<String?>? parentCaseId,
     Value<int>? rowid,
   }) {
     return TestCasesCompanion(
@@ -1332,6 +2470,7 @@ class TestCasesCompanion extends UpdateCompanion<TestCase> {
       assignedToUserId: assignedToUserId ?? this.assignedToUserId,
       expectedResult: expectedResult ?? this.expectedResult,
       lastModifiedUtc: lastModifiedUtc ?? this.lastModifiedUtc,
+      parentCaseId: parentCaseId ?? this.parentCaseId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1360,6 +2499,9 @@ class TestCasesCompanion extends UpdateCompanion<TestCase> {
     if (lastModifiedUtc.present) {
       map['last_modified_utc'] = Variable<DateTime>(lastModifiedUtc.value);
     }
+    if (parentCaseId.present) {
+      map['parent_case_id'] = Variable<String>(parentCaseId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1376,6 +2518,7 @@ class TestCasesCompanion extends UpdateCompanion<TestCase> {
           ..write('assignedToUserId: $assignedToUserId, ')
           ..write('expectedResult: $expectedResult, ')
           ..write('lastModifiedUtc: $lastModifiedUtc, ')
+          ..write('parentCaseId: $parentCaseId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2155,24 +3298,413 @@ class CommentsCompanion extends UpdateCompanion<Comment> {
   }
 }
 
+class $CustomStatusesTable extends CustomStatuses
+    with TableInfo<$CustomStatusesTable, CustomStatus> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CustomStatusesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _colorHexMeta = const VerificationMeta(
+    'colorHex',
+  );
+  @override
+  late final GeneratedColumn<String> colorHex = GeneratedColumn<String>(
+    'color_hex',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdByUserIdMeta = const VerificationMeta(
+    'createdByUserId',
+  );
+  @override
+  late final GeneratedColumn<String> createdByUserId = GeneratedColumn<String>(
+    'created_by_user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES users (id)',
+    ),
+  );
+  static const VerificationMeta _createdAtUtcMeta = const VerificationMeta(
+    'createdAtUtc',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAtUtc = GeneratedColumn<DateTime>(
+    'created_at_utc',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    colorHex,
+    createdByUserId,
+    createdAtUtc,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'custom_statuses';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CustomStatus> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('color_hex')) {
+      context.handle(
+        _colorHexMeta,
+        colorHex.isAcceptableOrUnknown(data['color_hex']!, _colorHexMeta),
+      );
+    }
+    if (data.containsKey('created_by_user_id')) {
+      context.handle(
+        _createdByUserIdMeta,
+        createdByUserId.isAcceptableOrUnknown(
+          data['created_by_user_id']!,
+          _createdByUserIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByUserIdMeta);
+    }
+    if (data.containsKey('created_at_utc')) {
+      context.handle(
+        _createdAtUtcMeta,
+        createdAtUtc.isAcceptableOrUnknown(
+          data['created_at_utc']!,
+          _createdAtUtcMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CustomStatus map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CustomStatus(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}id'],
+          )!,
+      name:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}name'],
+          )!,
+      colorHex: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}color_hex'],
+      ),
+      createdByUserId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}created_by_user_id'],
+          )!,
+      createdAtUtc: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at_utc'],
+      ),
+    );
+  }
+
+  @override
+  $CustomStatusesTable createAlias(String alias) {
+    return $CustomStatusesTable(attachedDatabase, alias);
+  }
+}
+
+class CustomStatus extends DataClass implements Insertable<CustomStatus> {
+  final String id;
+  final String name;
+  final String? colorHex;
+  final String createdByUserId;
+  final DateTime? createdAtUtc;
+  const CustomStatus({
+    required this.id,
+    required this.name,
+    this.colorHex,
+    required this.createdByUserId,
+    this.createdAtUtc,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || colorHex != null) {
+      map['color_hex'] = Variable<String>(colorHex);
+    }
+    map['created_by_user_id'] = Variable<String>(createdByUserId);
+    if (!nullToAbsent || createdAtUtc != null) {
+      map['created_at_utc'] = Variable<DateTime>(createdAtUtc);
+    }
+    return map;
+  }
+
+  CustomStatusesCompanion toCompanion(bool nullToAbsent) {
+    return CustomStatusesCompanion(
+      id: Value(id),
+      name: Value(name),
+      colorHex:
+          colorHex == null && nullToAbsent
+              ? const Value.absent()
+              : Value(colorHex),
+      createdByUserId: Value(createdByUserId),
+      createdAtUtc:
+          createdAtUtc == null && nullToAbsent
+              ? const Value.absent()
+              : Value(createdAtUtc),
+    );
+  }
+
+  factory CustomStatus.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CustomStatus(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      colorHex: serializer.fromJson<String?>(json['colorHex']),
+      createdByUserId: serializer.fromJson<String>(json['createdByUserId']),
+      createdAtUtc: serializer.fromJson<DateTime?>(json['createdAtUtc']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'colorHex': serializer.toJson<String?>(colorHex),
+      'createdByUserId': serializer.toJson<String>(createdByUserId),
+      'createdAtUtc': serializer.toJson<DateTime?>(createdAtUtc),
+    };
+  }
+
+  CustomStatus copyWith({
+    String? id,
+    String? name,
+    Value<String?> colorHex = const Value.absent(),
+    String? createdByUserId,
+    Value<DateTime?> createdAtUtc = const Value.absent(),
+  }) => CustomStatus(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    colorHex: colorHex.present ? colorHex.value : this.colorHex,
+    createdByUserId: createdByUserId ?? this.createdByUserId,
+    createdAtUtc: createdAtUtc.present ? createdAtUtc.value : this.createdAtUtc,
+  );
+  CustomStatus copyWithCompanion(CustomStatusesCompanion data) {
+    return CustomStatus(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      colorHex: data.colorHex.present ? data.colorHex.value : this.colorHex,
+      createdByUserId:
+          data.createdByUserId.present
+              ? data.createdByUserId.value
+              : this.createdByUserId,
+      createdAtUtc:
+          data.createdAtUtc.present
+              ? data.createdAtUtc.value
+              : this.createdAtUtc,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CustomStatus(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('colorHex: $colorHex, ')
+          ..write('createdByUserId: $createdByUserId, ')
+          ..write('createdAtUtc: $createdAtUtc')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, colorHex, createdByUserId, createdAtUtc);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CustomStatus &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.colorHex == this.colorHex &&
+          other.createdByUserId == this.createdByUserId &&
+          other.createdAtUtc == this.createdAtUtc);
+}
+
+class CustomStatusesCompanion extends UpdateCompanion<CustomStatus> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String?> colorHex;
+  final Value<String> createdByUserId;
+  final Value<DateTime?> createdAtUtc;
+  final Value<int> rowid;
+  const CustomStatusesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.colorHex = const Value.absent(),
+    this.createdByUserId = const Value.absent(),
+    this.createdAtUtc = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CustomStatusesCompanion.insert({
+    required String id,
+    required String name,
+    this.colorHex = const Value.absent(),
+    required String createdByUserId,
+    this.createdAtUtc = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name),
+       createdByUserId = Value(createdByUserId);
+  static Insertable<CustomStatus> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? colorHex,
+    Expression<String>? createdByUserId,
+    Expression<DateTime>? createdAtUtc,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (colorHex != null) 'color_hex': colorHex,
+      if (createdByUserId != null) 'created_by_user_id': createdByUserId,
+      if (createdAtUtc != null) 'created_at_utc': createdAtUtc,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CustomStatusesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<String?>? colorHex,
+    Value<String>? createdByUserId,
+    Value<DateTime?>? createdAtUtc,
+    Value<int>? rowid,
+  }) {
+    return CustomStatusesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      colorHex: colorHex ?? this.colorHex,
+      createdByUserId: createdByUserId ?? this.createdByUserId,
+      createdAtUtc: createdAtUtc ?? this.createdAtUtc,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (colorHex.present) {
+      map['color_hex'] = Variable<String>(colorHex.value);
+    }
+    if (createdByUserId.present) {
+      map['created_by_user_id'] = Variable<String>(createdByUserId.value);
+    }
+    if (createdAtUtc.present) {
+      map['created_at_utc'] = Variable<DateTime>(createdAtUtc.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CustomStatusesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('colorHex: $colorHex, ')
+          ..write('createdByUserId: $createdByUserId, ')
+          ..write('createdAtUtc: $createdAtUtc, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $UsersTable users = $UsersTable(this);
+  late final $ProjectsTable projects = $ProjectsTable(this);
+  late final $ModulesTable modules = $ModulesTable(this);
   late final $TestPlansTable testPlans = $TestPlansTable(this);
   late final $TestCasesTable testCases = $TestCasesTable(this);
   late final $TestStepsTable testSteps = $TestStepsTable(this);
   late final $CommentsTable comments = $CommentsTable(this);
+  late final $CustomStatusesTable customStatuses = $CustomStatusesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     users,
+    projects,
+    modules,
     testPlans,
     testCases,
     testSteps,
     comments,
+    customStatuses,
   ];
 }
 
@@ -2181,6 +3713,12 @@ typedef $$UsersTableCreateCompanionBuilder =
       required String id,
       Value<String?> displayName,
       Value<String?> email,
+      Value<String?> userPrincipalName,
+      Value<String?> loginName,
+      Value<String?> jobTitle,
+      Value<String?> department,
+      Value<String?> pictureUrl,
+      Value<DateTime?> createdAtUtc,
       Value<DateTime?> lastModifiedUtc,
       Value<int> rowid,
     });
@@ -2189,6 +3727,12 @@ typedef $$UsersTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String?> displayName,
       Value<String?> email,
+      Value<String?> userPrincipalName,
+      Value<String?> loginName,
+      Value<String?> jobTitle,
+      Value<String?> department,
+      Value<String?> pictureUrl,
+      Value<DateTime?> createdAtUtc,
       Value<DateTime?> lastModifiedUtc,
       Value<int> rowid,
     });
@@ -2249,6 +3793,29 @@ final class $$UsersTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$CustomStatusesTable, List<CustomStatus>>
+  _customStatusesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.customStatuses,
+    aliasName: $_aliasNameGenerator(
+      db.users.id,
+      db.customStatuses.createdByUserId,
+    ),
+  );
+
+  $$CustomStatusesTableProcessedTableManager get customStatusesRefs {
+    final manager = $$CustomStatusesTableTableManager(
+      $_db,
+      $_db.customStatuses,
+    ).filter(
+      (f) => f.createdByUserId.id.sqlEquals($_itemColumn<String>('id')!),
+    );
+
+    final cache = $_typedResult.readTableOrNull(_customStatusesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
@@ -2271,6 +3838,36 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
 
   ColumnFilters<String> get email => $composableBuilder(
     column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userPrincipalName => $composableBuilder(
+    column: $table.userPrincipalName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get loginName => $composableBuilder(
+    column: $table.loginName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get jobTitle => $composableBuilder(
+    column: $table.jobTitle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get department => $composableBuilder(
+    column: $table.department,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pictureUrl => $composableBuilder(
+    column: $table.pictureUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAtUtc => $composableBuilder(
+    column: $table.createdAtUtc,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2353,6 +3950,31 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
     );
     return f(composer);
   }
+
+  Expression<bool> customStatusesRefs(
+    Expression<bool> Function($$CustomStatusesTableFilterComposer f) f,
+  ) {
+    final $$CustomStatusesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.customStatuses,
+      getReferencedColumn: (t) => t.createdByUserId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CustomStatusesTableFilterComposer(
+            $db: $db,
+            $table: $db.customStatuses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$UsersTableOrderingComposer
@@ -2376,6 +3998,36 @@ class $$UsersTableOrderingComposer
 
   ColumnOrderings<String> get email => $composableBuilder(
     column: $table.email,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get userPrincipalName => $composableBuilder(
+    column: $table.userPrincipalName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get loginName => $composableBuilder(
+    column: $table.loginName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get jobTitle => $composableBuilder(
+    column: $table.jobTitle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get department => $composableBuilder(
+    column: $table.department,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get pictureUrl => $composableBuilder(
+    column: $table.pictureUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAtUtc => $composableBuilder(
+    column: $table.createdAtUtc,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -2404,6 +4056,32 @@ class $$UsersTableAnnotationComposer
 
   GeneratedColumn<String> get email =>
       $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<String> get userPrincipalName => $composableBuilder(
+    column: $table.userPrincipalName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get loginName =>
+      $composableBuilder(column: $table.loginName, builder: (column) => column);
+
+  GeneratedColumn<String> get jobTitle =>
+      $composableBuilder(column: $table.jobTitle, builder: (column) => column);
+
+  GeneratedColumn<String> get department => $composableBuilder(
+    column: $table.department,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get pictureUrl => $composableBuilder(
+    column: $table.pictureUrl,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAtUtc => $composableBuilder(
+    column: $table.createdAtUtc,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get lastModifiedUtc => $composableBuilder(
     column: $table.lastModifiedUtc,
@@ -2484,6 +4162,31 @@ class $$UsersTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> customStatusesRefs<T extends Object>(
+    Expression<T> Function($$CustomStatusesTableAnnotationComposer a) f,
+  ) {
+    final $$CustomStatusesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.customStatuses,
+      getReferencedColumn: (t) => t.createdByUserId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CustomStatusesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.customStatuses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$UsersTableTableManager
@@ -2503,6 +4206,7 @@ class $$UsersTableTableManager
             bool testPlansRefs,
             bool testCasesRefs,
             bool commentsRefs,
+            bool customStatusesRefs,
           })
         > {
   $$UsersTableTableManager(_$AppDatabase db, $UsersTable table)
@@ -2521,12 +4225,24 @@ class $$UsersTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String?> displayName = const Value.absent(),
                 Value<String?> email = const Value.absent(),
+                Value<String?> userPrincipalName = const Value.absent(),
+                Value<String?> loginName = const Value.absent(),
+                Value<String?> jobTitle = const Value.absent(),
+                Value<String?> department = const Value.absent(),
+                Value<String?> pictureUrl = const Value.absent(),
+                Value<DateTime?> createdAtUtc = const Value.absent(),
                 Value<DateTime?> lastModifiedUtc = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UsersCompanion(
                 id: id,
                 displayName: displayName,
                 email: email,
+                userPrincipalName: userPrincipalName,
+                loginName: loginName,
+                jobTitle: jobTitle,
+                department: department,
+                pictureUrl: pictureUrl,
+                createdAtUtc: createdAtUtc,
                 lastModifiedUtc: lastModifiedUtc,
                 rowid: rowid,
               ),
@@ -2535,12 +4251,24 @@ class $$UsersTableTableManager
                 required String id,
                 Value<String?> displayName = const Value.absent(),
                 Value<String?> email = const Value.absent(),
+                Value<String?> userPrincipalName = const Value.absent(),
+                Value<String?> loginName = const Value.absent(),
+                Value<String?> jobTitle = const Value.absent(),
+                Value<String?> department = const Value.absent(),
+                Value<String?> pictureUrl = const Value.absent(),
+                Value<DateTime?> createdAtUtc = const Value.absent(),
                 Value<DateTime?> lastModifiedUtc = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UsersCompanion.insert(
                 id: id,
                 displayName: displayName,
                 email: email,
+                userPrincipalName: userPrincipalName,
+                loginName: loginName,
+                jobTitle: jobTitle,
+                department: department,
+                pictureUrl: pictureUrl,
+                createdAtUtc: createdAtUtc,
                 lastModifiedUtc: lastModifiedUtc,
                 rowid: rowid,
               ),
@@ -2558,6 +4286,7 @@ class $$UsersTableTableManager
             testPlansRefs = false,
             testCasesRefs = false,
             commentsRefs = false,
+            customStatusesRefs = false,
           }) {
             return PrefetchHooks(
               db: db,
@@ -2565,6 +4294,7 @@ class $$UsersTableTableManager
                 if (testPlansRefs) db.testPlans,
                 if (testCasesRefs) db.testCases,
                 if (commentsRefs) db.comments,
+                if (customStatusesRefs) db.customStatuses,
               ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
@@ -2623,6 +4353,24 @@ class $$UsersTableTableManager
                           ),
                       typedResults: items,
                     ),
+                  if (customStatusesRefs)
+                    await $_getPrefetchedData<User, $UsersTable, CustomStatus>(
+                      currentTable: table,
+                      referencedTable: $$UsersTableReferences
+                          ._customStatusesRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$UsersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).customStatusesRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.createdByUserId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
                 ];
               },
             );
@@ -2647,6 +4395,802 @@ typedef $$UsersTableProcessedTableManager =
         bool testPlansRefs,
         bool testCasesRefs,
         bool commentsRefs,
+        bool customStatusesRefs,
+      })
+    >;
+typedef $$ProjectsTableCreateCompanionBuilder =
+    ProjectsCompanion Function({
+      required String id,
+      required String name,
+      Value<String?> description,
+      Value<DateTime?> createdAtUtc,
+      Value<int> rowid,
+    });
+typedef $$ProjectsTableUpdateCompanionBuilder =
+    ProjectsCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<String?> description,
+      Value<DateTime?> createdAtUtc,
+      Value<int> rowid,
+    });
+
+final class $$ProjectsTableReferences
+    extends BaseReferences<_$AppDatabase, $ProjectsTable, Project> {
+  $$ProjectsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$ModulesTable, List<Module>> _modulesRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.modules,
+    aliasName: $_aliasNameGenerator(db.projects.id, db.modules.projectId),
+  );
+
+  $$ModulesTableProcessedTableManager get modulesRefs {
+    final manager = $$ModulesTableTableManager(
+      $_db,
+      $_db.modules,
+    ).filter((f) => f.projectId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_modulesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$ProjectsTableFilterComposer
+    extends Composer<_$AppDatabase, $ProjectsTable> {
+  $$ProjectsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAtUtc => $composableBuilder(
+    column: $table.createdAtUtc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> modulesRefs(
+    Expression<bool> Function($$ModulesTableFilterComposer f) f,
+  ) {
+    final $$ModulesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.modules,
+      getReferencedColumn: (t) => t.projectId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ModulesTableFilterComposer(
+            $db: $db,
+            $table: $db.modules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ProjectsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ProjectsTable> {
+  $$ProjectsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAtUtc => $composableBuilder(
+    column: $table.createdAtUtc,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ProjectsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ProjectsTable> {
+  $$ProjectsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAtUtc => $composableBuilder(
+    column: $table.createdAtUtc,
+    builder: (column) => column,
+  );
+
+  Expression<T> modulesRefs<T extends Object>(
+    Expression<T> Function($$ModulesTableAnnotationComposer a) f,
+  ) {
+    final $$ModulesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.modules,
+      getReferencedColumn: (t) => t.projectId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ModulesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.modules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ProjectsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ProjectsTable,
+          Project,
+          $$ProjectsTableFilterComposer,
+          $$ProjectsTableOrderingComposer,
+          $$ProjectsTableAnnotationComposer,
+          $$ProjectsTableCreateCompanionBuilder,
+          $$ProjectsTableUpdateCompanionBuilder,
+          (Project, $$ProjectsTableReferences),
+          Project,
+          PrefetchHooks Function({bool modulesRefs})
+        > {
+  $$ProjectsTableTableManager(_$AppDatabase db, $ProjectsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer:
+              () => $$ProjectsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $$ProjectsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $$ProjectsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<DateTime?> createdAtUtc = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ProjectsCompanion(
+                id: id,
+                name: name,
+                description: description,
+                createdAtUtc: createdAtUtc,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                Value<String?> description = const Value.absent(),
+                Value<DateTime?> createdAtUtc = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ProjectsCompanion.insert(
+                id: id,
+                name: name,
+                description: description,
+                createdAtUtc: createdAtUtc,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          $$ProjectsTableReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: ({modulesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (modulesRefs) db.modules],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (modulesRefs)
+                    await $_getPrefetchedData<Project, $ProjectsTable, Module>(
+                      currentTable: table,
+                      referencedTable: $$ProjectsTableReferences
+                          ._modulesRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$ProjectsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).modulesRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.projectId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ProjectsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ProjectsTable,
+      Project,
+      $$ProjectsTableFilterComposer,
+      $$ProjectsTableOrderingComposer,
+      $$ProjectsTableAnnotationComposer,
+      $$ProjectsTableCreateCompanionBuilder,
+      $$ProjectsTableUpdateCompanionBuilder,
+      (Project, $$ProjectsTableReferences),
+      Project,
+      PrefetchHooks Function({bool modulesRefs})
+    >;
+typedef $$ModulesTableCreateCompanionBuilder =
+    ModulesCompanion Function({
+      required String id,
+      required String name,
+      Value<String?> description,
+      required String projectId,
+      Value<String?> parentModuleId,
+      Value<int> rowid,
+    });
+typedef $$ModulesTableUpdateCompanionBuilder =
+    ModulesCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<String?> description,
+      Value<String> projectId,
+      Value<String?> parentModuleId,
+      Value<int> rowid,
+    });
+
+final class $$ModulesTableReferences
+    extends BaseReferences<_$AppDatabase, $ModulesTable, Module> {
+  $$ModulesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $ProjectsTable _projectIdTable(_$AppDatabase db) => db.projects
+      .createAlias($_aliasNameGenerator(db.modules.projectId, db.projects.id));
+
+  $$ProjectsTableProcessedTableManager get projectId {
+    final $_column = $_itemColumn<String>('project_id')!;
+
+    final manager = $$ProjectsTableTableManager(
+      $_db,
+      $_db.projects,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_projectIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ModulesTable _parentModuleIdTable(_$AppDatabase db) =>
+      db.modules.createAlias(
+        $_aliasNameGenerator(db.modules.parentModuleId, db.modules.id),
+      );
+
+  $$ModulesTableProcessedTableManager? get parentModuleId {
+    final $_column = $_itemColumn<String>('parent_module_id');
+    if ($_column == null) return null;
+    final manager = $$ModulesTableTableManager(
+      $_db,
+      $_db.modules,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_parentModuleIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$TestPlansTable, List<TestPlan>>
+  _testPlansRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.testPlans,
+    aliasName: $_aliasNameGenerator(db.modules.id, db.testPlans.moduleId),
+  );
+
+  $$TestPlansTableProcessedTableManager get testPlansRefs {
+    final manager = $$TestPlansTableTableManager(
+      $_db,
+      $_db.testPlans,
+    ).filter((f) => f.moduleId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_testPlansRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$ModulesTableFilterComposer
+    extends Composer<_$AppDatabase, $ModulesTable> {
+  $$ModulesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ProjectsTableFilterComposer get projectId {
+    final $$ProjectsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.projectId,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableFilterComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ModulesTableFilterComposer get parentModuleId {
+    final $$ModulesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.parentModuleId,
+      referencedTable: $db.modules,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ModulesTableFilterComposer(
+            $db: $db,
+            $table: $db.modules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> testPlansRefs(
+    Expression<bool> Function($$TestPlansTableFilterComposer f) f,
+  ) {
+    final $$TestPlansTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.testPlans,
+      getReferencedColumn: (t) => t.moduleId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TestPlansTableFilterComposer(
+            $db: $db,
+            $table: $db.testPlans,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ModulesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ModulesTable> {
+  $$ModulesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ProjectsTableOrderingComposer get projectId {
+    final $$ProjectsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.projectId,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableOrderingComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ModulesTableOrderingComposer get parentModuleId {
+    final $$ModulesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.parentModuleId,
+      referencedTable: $db.modules,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ModulesTableOrderingComposer(
+            $db: $db,
+            $table: $db.modules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ModulesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ModulesTable> {
+  $$ModulesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  $$ProjectsTableAnnotationComposer get projectId {
+    final $$ProjectsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.projectId,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ModulesTableAnnotationComposer get parentModuleId {
+    final $$ModulesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.parentModuleId,
+      referencedTable: $db.modules,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ModulesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.modules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> testPlansRefs<T extends Object>(
+    Expression<T> Function($$TestPlansTableAnnotationComposer a) f,
+  ) {
+    final $$TestPlansTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.testPlans,
+      getReferencedColumn: (t) => t.moduleId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TestPlansTableAnnotationComposer(
+            $db: $db,
+            $table: $db.testPlans,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ModulesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ModulesTable,
+          Module,
+          $$ModulesTableFilterComposer,
+          $$ModulesTableOrderingComposer,
+          $$ModulesTableAnnotationComposer,
+          $$ModulesTableCreateCompanionBuilder,
+          $$ModulesTableUpdateCompanionBuilder,
+          (Module, $$ModulesTableReferences),
+          Module,
+          PrefetchHooks Function({
+            bool projectId,
+            bool parentModuleId,
+            bool testPlansRefs,
+          })
+        > {
+  $$ModulesTableTableManager(_$AppDatabase db, $ModulesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer:
+              () => $$ModulesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $$ModulesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $$ModulesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String?> parentModuleId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ModulesCompanion(
+                id: id,
+                name: name,
+                description: description,
+                projectId: projectId,
+                parentModuleId: parentModuleId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                Value<String?> description = const Value.absent(),
+                required String projectId,
+                Value<String?> parentModuleId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ModulesCompanion.insert(
+                id: id,
+                name: name,
+                description: description,
+                projectId: projectId,
+                parentModuleId: parentModuleId,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          $$ModulesTableReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: ({
+            projectId = false,
+            parentModuleId = false,
+            testPlansRefs = false,
+          }) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (testPlansRefs) db.testPlans],
+              addJoins: <
+                T extends TableManagerState<
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic
+                >
+              >(state) {
+                if (projectId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.projectId,
+                            referencedTable: $$ModulesTableReferences
+                                ._projectIdTable(db),
+                            referencedColumn:
+                                $$ModulesTableReferences._projectIdTable(db).id,
+                          )
+                          as T;
+                }
+                if (parentModuleId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.parentModuleId,
+                            referencedTable: $$ModulesTableReferences
+                                ._parentModuleIdTable(db),
+                            referencedColumn:
+                                $$ModulesTableReferences
+                                    ._parentModuleIdTable(db)
+                                    .id,
+                          )
+                          as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (testPlansRefs)
+                    await $_getPrefetchedData<Module, $ModulesTable, TestPlan>(
+                      currentTable: table,
+                      referencedTable: $$ModulesTableReferences
+                          ._testPlansRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$ModulesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).testPlansRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.moduleId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ModulesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ModulesTable,
+      Module,
+      $$ModulesTableFilterComposer,
+      $$ModulesTableOrderingComposer,
+      $$ModulesTableAnnotationComposer,
+      $$ModulesTableCreateCompanionBuilder,
+      $$ModulesTableUpdateCompanionBuilder,
+      (Module, $$ModulesTableReferences),
+      Module,
+      PrefetchHooks Function({
+        bool projectId,
+        bool parentModuleId,
+        bool testPlansRefs,
       })
     >;
 typedef $$TestPlansTableCreateCompanionBuilder =
@@ -2654,6 +5198,7 @@ typedef $$TestPlansTableCreateCompanionBuilder =
       required String id,
       required String name,
       Value<String?> description,
+      required String moduleId,
       Value<String?> ownerUserId,
       Value<DateTime?> lastModifiedUtc,
       Value<int> overallPassed,
@@ -2666,6 +5211,7 @@ typedef $$TestPlansTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> name,
       Value<String?> description,
+      Value<String> moduleId,
       Value<String?> ownerUserId,
       Value<DateTime?> lastModifiedUtc,
       Value<int> overallPassed,
@@ -2677,6 +5223,23 @@ typedef $$TestPlansTableUpdateCompanionBuilder =
 final class $$TestPlansTableReferences
     extends BaseReferences<_$AppDatabase, $TestPlansTable, TestPlan> {
   $$TestPlansTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $ModulesTable _moduleIdTable(_$AppDatabase db) => db.modules
+      .createAlias($_aliasNameGenerator(db.testPlans.moduleId, db.modules.id));
+
+  $$ModulesTableProcessedTableManager get moduleId {
+    final $_column = $_itemColumn<String>('module_id')!;
+
+    final manager = $$ModulesTableTableManager(
+      $_db,
+      $_db.modules,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_moduleIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
 
   static $UsersTable _ownerUserIdTable(_$AppDatabase db) => db.users
       .createAlias($_aliasNameGenerator(db.testPlans.ownerUserId, db.users.id));
@@ -2757,6 +5320,29 @@ class $$TestPlansTableFilterComposer
     column: $table.overallBlocked,
     builder: (column) => ColumnFilters(column),
   );
+
+  $$ModulesTableFilterComposer get moduleId {
+    final $$ModulesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.moduleId,
+      referencedTable: $db.modules,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ModulesTableFilterComposer(
+            $db: $db,
+            $table: $db.modules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 
   $$UsersTableFilterComposer get ownerUserId {
     final $$UsersTableFilterComposer composer = $composerBuilder(
@@ -2851,6 +5437,29 @@ class $$TestPlansTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  $$ModulesTableOrderingComposer get moduleId {
+    final $$ModulesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.moduleId,
+      referencedTable: $db.modules,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ModulesTableOrderingComposer(
+            $db: $db,
+            $table: $db.modules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
   $$UsersTableOrderingComposer get ownerUserId {
     final $$UsersTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -2915,6 +5524,29 @@ class $$TestPlansTableAnnotationComposer
     builder: (column) => column,
   );
 
+  $$ModulesTableAnnotationComposer get moduleId {
+    final $$ModulesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.moduleId,
+      referencedTable: $db.modules,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ModulesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.modules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
   $$UsersTableAnnotationComposer get ownerUserId {
     final $$UsersTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -2977,7 +5609,11 @@ class $$TestPlansTableTableManager
           $$TestPlansTableUpdateCompanionBuilder,
           (TestPlan, $$TestPlansTableReferences),
           TestPlan,
-          PrefetchHooks Function({bool ownerUserId, bool testCasesRefs})
+          PrefetchHooks Function({
+            bool moduleId,
+            bool ownerUserId,
+            bool testCasesRefs,
+          })
         > {
   $$TestPlansTableTableManager(_$AppDatabase db, $TestPlansTable table)
     : super(
@@ -2995,6 +5631,7 @@ class $$TestPlansTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String?> description = const Value.absent(),
+                Value<String> moduleId = const Value.absent(),
                 Value<String?> ownerUserId = const Value.absent(),
                 Value<DateTime?> lastModifiedUtc = const Value.absent(),
                 Value<int> overallPassed = const Value.absent(),
@@ -3005,6 +5642,7 @@ class $$TestPlansTableTableManager
                 id: id,
                 name: name,
                 description: description,
+                moduleId: moduleId,
                 ownerUserId: ownerUserId,
                 lastModifiedUtc: lastModifiedUtc,
                 overallPassed: overallPassed,
@@ -3017,6 +5655,7 @@ class $$TestPlansTableTableManager
                 required String id,
                 required String name,
                 Value<String?> description = const Value.absent(),
+                required String moduleId,
                 Value<String?> ownerUserId = const Value.absent(),
                 Value<DateTime?> lastModifiedUtc = const Value.absent(),
                 Value<int> overallPassed = const Value.absent(),
@@ -3027,6 +5666,7 @@ class $$TestPlansTableTableManager
                 id: id,
                 name: name,
                 description: description,
+                moduleId: moduleId,
                 ownerUserId: ownerUserId,
                 lastModifiedUtc: lastModifiedUtc,
                 overallPassed: overallPassed,
@@ -3045,6 +5685,7 @@ class $$TestPlansTableTableManager
                       )
                       .toList(),
           prefetchHooksCallback: ({
+            moduleId = false,
             ownerUserId = false,
             testCasesRefs = false,
           }) {
@@ -3066,6 +5707,20 @@ class $$TestPlansTableTableManager
                   dynamic
                 >
               >(state) {
+                if (moduleId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.moduleId,
+                            referencedTable: $$TestPlansTableReferences
+                                ._moduleIdTable(db),
+                            referencedColumn:
+                                $$TestPlansTableReferences
+                                    ._moduleIdTable(db)
+                                    .id,
+                          )
+                          as T;
+                }
                 if (ownerUserId) {
                   state =
                       state.withJoin(
@@ -3126,7 +5781,11 @@ typedef $$TestPlansTableProcessedTableManager =
       $$TestPlansTableUpdateCompanionBuilder,
       (TestPlan, $$TestPlansTableReferences),
       TestPlan,
-      PrefetchHooks Function({bool ownerUserId, bool testCasesRefs})
+      PrefetchHooks Function({
+        bool moduleId,
+        bool ownerUserId,
+        bool testCasesRefs,
+      })
     >;
 typedef $$TestCasesTableCreateCompanionBuilder =
     TestCasesCompanion Function({
@@ -3137,6 +5796,7 @@ typedef $$TestCasesTableCreateCompanionBuilder =
       Value<String?> assignedToUserId,
       Value<String?> expectedResult,
       Value<DateTime?> lastModifiedUtc,
+      Value<String?> parentCaseId,
       Value<int> rowid,
     });
 typedef $$TestCasesTableUpdateCompanionBuilder =
@@ -3148,6 +5808,7 @@ typedef $$TestCasesTableUpdateCompanionBuilder =
       Value<String?> assignedToUserId,
       Value<String?> expectedResult,
       Value<DateTime?> lastModifiedUtc,
+      Value<String?> parentCaseId,
       Value<int> rowid,
     });
 
@@ -3185,6 +5846,25 @@ final class $$TestCasesTableReferences
       $_db.users,
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_assignedToUserIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $TestCasesTable _parentCaseIdTable(_$AppDatabase db) =>
+      db.testCases.createAlias(
+        $_aliasNameGenerator(db.testCases.parentCaseId, db.testCases.id),
+      );
+
+  $$TestCasesTableProcessedTableManager? get parentCaseId {
+    final $_column = $_itemColumn<String>('parent_case_id');
+    if ($_column == null) return null;
+    final manager = $$TestCasesTableTableManager(
+      $_db,
+      $_db.testCases,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_parentCaseIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -3300,6 +5980,29 @@ class $$TestCasesTableFilterComposer
           }) => $$UsersTableFilterComposer(
             $db: $db,
             $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TestCasesTableFilterComposer get parentCaseId {
+    final $$TestCasesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.parentCaseId,
+      referencedTable: $db.testCases,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TestCasesTableFilterComposer(
+            $db: $db,
+            $table: $db.testCases,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -3439,6 +6142,29 @@ class $$TestCasesTableOrderingComposer
     );
     return composer;
   }
+
+  $$TestCasesTableOrderingComposer get parentCaseId {
+    final $$TestCasesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.parentCaseId,
+      referencedTable: $db.testCases,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TestCasesTableOrderingComposer(
+            $db: $db,
+            $table: $db.testCases,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$TestCasesTableAnnotationComposer
@@ -3515,6 +6241,29 @@ class $$TestCasesTableAnnotationComposer
     return composer;
   }
 
+  $$TestCasesTableAnnotationComposer get parentCaseId {
+    final $$TestCasesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.parentCaseId,
+      referencedTable: $db.testCases,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TestCasesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.testCases,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
   Expression<T> testStepsRefs<T extends Object>(
     Expression<T> Function($$TestStepsTableAnnotationComposer a) f,
   ) {
@@ -3582,6 +6331,7 @@ class $$TestCasesTableTableManager
           PrefetchHooks Function({
             bool planId,
             bool assignedToUserId,
+            bool parentCaseId,
             bool testStepsRefs,
             bool commentsRefs,
           })
@@ -3606,6 +6356,7 @@ class $$TestCasesTableTableManager
                 Value<String?> assignedToUserId = const Value.absent(),
                 Value<String?> expectedResult = const Value.absent(),
                 Value<DateTime?> lastModifiedUtc = const Value.absent(),
+                Value<String?> parentCaseId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TestCasesCompanion(
                 id: id,
@@ -3615,6 +6366,7 @@ class $$TestCasesTableTableManager
                 assignedToUserId: assignedToUserId,
                 expectedResult: expectedResult,
                 lastModifiedUtc: lastModifiedUtc,
+                parentCaseId: parentCaseId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3626,6 +6378,7 @@ class $$TestCasesTableTableManager
                 Value<String?> assignedToUserId = const Value.absent(),
                 Value<String?> expectedResult = const Value.absent(),
                 Value<DateTime?> lastModifiedUtc = const Value.absent(),
+                Value<String?> parentCaseId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TestCasesCompanion.insert(
                 id: id,
@@ -3635,6 +6388,7 @@ class $$TestCasesTableTableManager
                 assignedToUserId: assignedToUserId,
                 expectedResult: expectedResult,
                 lastModifiedUtc: lastModifiedUtc,
+                parentCaseId: parentCaseId,
                 rowid: rowid,
               ),
           withReferenceMapper:
@@ -3650,6 +6404,7 @@ class $$TestCasesTableTableManager
           prefetchHooksCallback: ({
             planId = false,
             assignedToUserId = false,
+            parentCaseId = false,
             testStepsRefs = false,
             commentsRefs = false,
           }) {
@@ -3696,6 +6451,20 @@ class $$TestCasesTableTableManager
                             referencedColumn:
                                 $$TestCasesTableReferences
                                     ._assignedToUserIdTable(db)
+                                    .id,
+                          )
+                          as T;
+                }
+                if (parentCaseId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.parentCaseId,
+                            referencedTable: $$TestCasesTableReferences
+                                ._parentCaseIdTable(db),
+                            referencedColumn:
+                                $$TestCasesTableReferences
+                                    ._parentCaseIdTable(db)
                                     .id,
                           )
                           as T;
@@ -3772,6 +6541,7 @@ typedef $$TestCasesTableProcessedTableManager =
       PrefetchHooks Function({
         bool planId,
         bool assignedToUserId,
+        bool parentCaseId,
         bool testStepsRefs,
         bool commentsRefs,
       })
@@ -4516,12 +7286,349 @@ typedef $$CommentsTableProcessedTableManager =
       Comment,
       PrefetchHooks Function({bool testCaseId, bool createdByUserId})
     >;
+typedef $$CustomStatusesTableCreateCompanionBuilder =
+    CustomStatusesCompanion Function({
+      required String id,
+      required String name,
+      Value<String?> colorHex,
+      required String createdByUserId,
+      Value<DateTime?> createdAtUtc,
+      Value<int> rowid,
+    });
+typedef $$CustomStatusesTableUpdateCompanionBuilder =
+    CustomStatusesCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<String?> colorHex,
+      Value<String> createdByUserId,
+      Value<DateTime?> createdAtUtc,
+      Value<int> rowid,
+    });
+
+final class $$CustomStatusesTableReferences
+    extends BaseReferences<_$AppDatabase, $CustomStatusesTable, CustomStatus> {
+  $$CustomStatusesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $UsersTable _createdByUserIdTable(_$AppDatabase db) =>
+      db.users.createAlias(
+        $_aliasNameGenerator(db.customStatuses.createdByUserId, db.users.id),
+      );
+
+  $$UsersTableProcessedTableManager get createdByUserId {
+    final $_column = $_itemColumn<String>('created_by_user_id')!;
+
+    final manager = $$UsersTableTableManager(
+      $_db,
+      $_db.users,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_createdByUserIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$CustomStatusesTableFilterComposer
+    extends Composer<_$AppDatabase, $CustomStatusesTable> {
+  $$CustomStatusesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get colorHex => $composableBuilder(
+    column: $table.colorHex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAtUtc => $composableBuilder(
+    column: $table.createdAtUtc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$UsersTableFilterComposer get createdByUserId {
+    final $$UsersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.createdByUserId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableFilterComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CustomStatusesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CustomStatusesTable> {
+  $$CustomStatusesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get colorHex => $composableBuilder(
+    column: $table.colorHex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAtUtc => $composableBuilder(
+    column: $table.createdAtUtc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$UsersTableOrderingComposer get createdByUserId {
+    final $$UsersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.createdByUserId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableOrderingComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CustomStatusesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CustomStatusesTable> {
+  $$CustomStatusesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get colorHex =>
+      $composableBuilder(column: $table.colorHex, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAtUtc => $composableBuilder(
+    column: $table.createdAtUtc,
+    builder: (column) => column,
+  );
+
+  $$UsersTableAnnotationComposer get createdByUserId {
+    final $$UsersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.createdByUserId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CustomStatusesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CustomStatusesTable,
+          CustomStatus,
+          $$CustomStatusesTableFilterComposer,
+          $$CustomStatusesTableOrderingComposer,
+          $$CustomStatusesTableAnnotationComposer,
+          $$CustomStatusesTableCreateCompanionBuilder,
+          $$CustomStatusesTableUpdateCompanionBuilder,
+          (CustomStatus, $$CustomStatusesTableReferences),
+          CustomStatus,
+          PrefetchHooks Function({bool createdByUserId})
+        > {
+  $$CustomStatusesTableTableManager(
+    _$AppDatabase db,
+    $CustomStatusesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer:
+              () => $$CustomStatusesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () =>
+                  $$CustomStatusesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $$CustomStatusesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> colorHex = const Value.absent(),
+                Value<String> createdByUserId = const Value.absent(),
+                Value<DateTime?> createdAtUtc = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CustomStatusesCompanion(
+                id: id,
+                name: name,
+                colorHex: colorHex,
+                createdByUserId: createdByUserId,
+                createdAtUtc: createdAtUtc,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                Value<String?> colorHex = const Value.absent(),
+                required String createdByUserId,
+                Value<DateTime?> createdAtUtc = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CustomStatusesCompanion.insert(
+                id: id,
+                name: name,
+                colorHex: colorHex,
+                createdByUserId: createdByUserId,
+                createdAtUtc: createdAtUtc,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          $$CustomStatusesTableReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: ({createdByUserId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                T extends TableManagerState<
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic
+                >
+              >(state) {
+                if (createdByUserId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.createdByUserId,
+                            referencedTable: $$CustomStatusesTableReferences
+                                ._createdByUserIdTable(db),
+                            referencedColumn:
+                                $$CustomStatusesTableReferences
+                                    ._createdByUserIdTable(db)
+                                    .id,
+                          )
+                          as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CustomStatusesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CustomStatusesTable,
+      CustomStatus,
+      $$CustomStatusesTableFilterComposer,
+      $$CustomStatusesTableOrderingComposer,
+      $$CustomStatusesTableAnnotationComposer,
+      $$CustomStatusesTableCreateCompanionBuilder,
+      $$CustomStatusesTableUpdateCompanionBuilder,
+      (CustomStatus, $$CustomStatusesTableReferences),
+      CustomStatus,
+      PrefetchHooks Function({bool createdByUserId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
   $$UsersTableTableManager get users =>
       $$UsersTableTableManager(_db, _db.users);
+  $$ProjectsTableTableManager get projects =>
+      $$ProjectsTableTableManager(_db, _db.projects);
+  $$ModulesTableTableManager get modules =>
+      $$ModulesTableTableManager(_db, _db.modules);
   $$TestPlansTableTableManager get testPlans =>
       $$TestPlansTableTableManager(_db, _db.testPlans);
   $$TestCasesTableTableManager get testCases =>
@@ -4530,4 +7637,6 @@ class $AppDatabaseManager {
       $$TestStepsTableTableManager(_db, _db.testSteps);
   $$CommentsTableTableManager get comments =>
       $$CommentsTableTableManager(_db, _db.comments);
+  $$CustomStatusesTableTableManager get customStatuses =>
+      $$CustomStatusesTableTableManager(_db, _db.customStatuses);
 }

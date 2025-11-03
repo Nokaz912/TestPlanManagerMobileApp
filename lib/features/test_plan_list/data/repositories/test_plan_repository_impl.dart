@@ -20,4 +20,16 @@ class TestPlanRepositoryImpl implements TestPlanRepository {
       return Left(DatabaseFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, List<TestPlanEntity>>> getPlansForModule(String moduleId) async {
+    try {
+      final plans = await dao.getPlansByModuleId(moduleId);
+      final entities = plans.map((p) => p.toEntity()).toList();
+      return Right(entities);
+    } catch (e) {
+      return Left(DatabaseFailure(e.toString()));
+    }
+  }
+
 }

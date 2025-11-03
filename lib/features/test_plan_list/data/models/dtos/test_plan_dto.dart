@@ -6,5 +6,6 @@ extension TestPlanMapper on TestPlan {
     id: id,
     name: name,
     description: description,
+    moduleId: moduleId
   );
 }
