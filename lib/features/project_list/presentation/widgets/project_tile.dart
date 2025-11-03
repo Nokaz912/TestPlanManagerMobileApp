@@ -14,7 +14,7 @@ class ProjectTile extends StatelessWidget {
       title: Text(project.name),
       subtitle: Text(project.description ?? ''),
       trailing: const Icon(Icons.chevron_right),
-      onTap: () => context.go('/modules/${project.id}'),
+      onTap: () => context.go('/modules/${project.id}', extra: project.name),
     );
   }
 }

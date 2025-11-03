@@ -31,36 +31,62 @@ final GoRouter router = GoRouter(
       },
     ),
 
-    GoRoute(
-      path: '/modules/:projectId',
-      name: 'modules',
-      builder: (context, state) {
-        final projectId = state.pathParameters['projectId']!;
-
+    ShellRoute(
+      builder: (context, state, child) {
         return BlocProvider(
-          create: (_) => sl<ModuleBloc>()
-            ..add(GetModulesForProjectEvent(projectId)),
-          child: ModuleListPage(projectId: projectId),
+          create: (_) => sl<ModuleBloc>(),
+          child: child,
         );
       },
-    ),
+      routes: [
+        GoRoute(
+          path: '/modules/:projectId',
+          name: 'modules',
+          builder: (context, state) {
+            final projectId = state.pathParameters['projectId']!;
+            final projectName = state.extra as String? ?? 'Modules'; // domyślnie
+            final bloc = context.read<ModuleBloc>();
 
-    GoRoute(
-      path: '/modules/:projectId/sub/:moduleId',
-      name: 'submodules',
-      builder: (context, state) {
-        final projectId = state.pathParameters['projectId']!;
-        final moduleId = state.pathParameters['moduleId']!;
+            if (bloc.state.modules.isEmpty) {
+              bloc.add(GetModulesForProjectEvent(projectId));
+            }
 
-        return BlocProvider(
-          create: (_) => sl<ModuleBloc>()
-            ..add(GetSubmodulesForModuleEvent(moduleId)),
-          child: ModuleListPage(
-            projectId: projectId,
-            moduleId: moduleId,
-          ),
-        );
-      },
+            return ModuleListPage(
+              projectId: projectId,
+              projectName: projectName,
+            );
+          },
+          routes: [
+            GoRoute(
+              path: 'sub/:moduleId',
+              name: 'submodules',
+              builder: (context, state) {
+                final projectId = state.pathParameters['projectId']!;
+                final moduleId = state.pathParameters['moduleId']!;
+                final bloc = context.read<ModuleBloc>();
+
+                // ✅ Pobierz projectName z parent route (dziedziczenie)
+                final projectName = state.extra as String? ?? 'Modules';
+
+                final hasSubmodules =
+                    bloc.state.submodules[moduleId]?.isNotEmpty ?? false;
+                final hasPlans =
+                    bloc.state.testPlans[moduleId]?.isNotEmpty ?? false;
+
+                if (!hasSubmodules && !hasPlans) {
+                  bloc.add(GetSubmodulesForModuleEvent(moduleId));
+                }
+
+                return ModuleListPage(
+                  projectId: projectId,
+                  projectName: projectName,
+                  moduleId: moduleId,
+                );
+              },
+            ),
+          ],
+        ),
+      ],
     ),
 
     GoRoute(
