@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../test_case_list/presentation/bloc/test_case_bloc.dart';
 import '../../../test_case_list/presentation/bloc/test_case_event.dart';
 import '../../../test_case_list/presentation/bloc/test_case_state.dart';
+import '../../../test_plan_list/presentation/bloc/test_plan_event.dart';
 
 class TestCaseListPage extends StatelessWidget {
   final String testPlanId;
@@ -25,9 +26,7 @@ class TestCaseListPage extends StatelessWidget {
 
 
           if (cases.isEmpty) {
-            context
-                .read<TestCaseBloc>()
-                .add(GetTestCasesForPlanEvent(testPlanId));
+
             return const Center(child: CircularProgressIndicator());
           }
 

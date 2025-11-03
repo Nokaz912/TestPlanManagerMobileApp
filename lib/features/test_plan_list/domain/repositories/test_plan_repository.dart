@@ -1,9 +1,11 @@
 import '../../../../core/error/failures.dart';
-import '../entities/test_plan.dart';
+import '../../../module_list/domain/entities/test_plan.dart';
 import 'package:dartz/dartz.dart';
+
+import '../entities/test_case.dart';
 
 
 abstract class TestPlanRepository {
-  Future<Either<Failure, List<TestPlanEntity>>> getAllPlans();
-  Future<Either<Failure, List<TestPlanEntity>>> getPlansForModule(String moduleId);
+  Future<Either<Failure, List<TestCaseEntity>>> getCasesForPlan(String planId);
+
 }

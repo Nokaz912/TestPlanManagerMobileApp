@@ -36,17 +36,10 @@ final GoRouter router = GoRouter(
       name: 'modules',
       builder: (context, state) {
         final projectId = state.pathParameters['projectId']!;
-        return MultiBlocProvider(
-          providers: [
-            BlocProvider(
-            create: (_) =>
-            sl<ModuleBloc>()..add(GetModulesForProjectEvent(projectId)),
-            ),
-            BlocProvider(
-              create: (_) =>
-              sl<TestPlanBloc>()..add(GetAllTestPlansEvent()),
-            ),
-          ],
+
+        return BlocProvider(
+          create: (_) => sl<ModuleBloc>()
+            ..add(GetModulesForProjectEvent(projectId)),
           child: ModuleListPage(projectId: projectId),
         );
       },
@@ -58,17 +51,10 @@ final GoRouter router = GoRouter(
       builder: (context, state) {
         final projectId = state.pathParameters['projectId']!;
         final moduleId = state.pathParameters['moduleId']!;
-        return MultiBlocProvider(
-          providers: [
-            BlocProvider(
-              create: (_) =>
-              sl<ModuleBloc>()..add(GetSubmodulesForModuleEvent(moduleId)),
-            ),
-            BlocProvider(
-              create: (_) =>
-              sl<TestPlanBloc>()..add(GetTestPlansForModuleEvent(moduleId)),
-            ),
-          ],
+
+        return BlocProvider(
+          create: (_) => sl<ModuleBloc>()
+            ..add(GetSubmodulesForModuleEvent(moduleId)),
           child: ModuleListPage(
             projectId: projectId,
             moduleId: moduleId,
@@ -77,32 +63,27 @@ final GoRouter router = GoRouter(
       },
     ),
 
-
-
     GoRoute(
-      path: '/plans/:moduleId',
-      name: 'plans',
-      builder: (context, state) {
-        final moduleId = state.pathParameters['moduleId']!;
-        return BlocProvider(
-          create: (_) =>
-          sl<TestPlanBloc>()..add(GetTestPlansForModuleEvent(moduleId)),
-          child: TestPlanListPage(moduleId: moduleId),
-        );
-      },
-    ),
-
-    GoRoute(
-      path: '/cases/:planId',
-      name: 'cases',
+      path: '/plans/:planId',
+      name: 'testcases',
       builder: (context, state) {
         final planId = state.pathParameters['planId']!;
-        return BlocProvider(
-          create: (_) =>
-          sl<TestCaseBloc>()..add(GetTestCasesForPlanEvent(planId)),
-          child: TestCaseListPage(testPlanId: planId),
-        );
+        return TestPlanListPage(planId: planId);
       },
     ),
+
+
+    // GoRoute(
+    //   path: '/cases/:planId',
+    //   name: 'cases',
+    //   builder: (context, state) {
+    //     final planId = state.pathParameters['planId']!;
+    //     return BlocProvider(
+    //       create: (_) =>
+    //       sl<TestCaseBloc>()..add(GetTestCasesForPlanEvent(planId)),
+    //       child: TestCaseListPage(testPlanId: planId),
+    //     );
+    //   },
+    // ),
   ],
 );

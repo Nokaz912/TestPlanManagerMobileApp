@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../test_case_list/presentation/pages/test_cases_list_page.dart';
-import '../../../test_plan_list/domain/entities/test_plan.dart';
+import 'package:go_router/go_router.dart';
+import '../../domain/entities/test_plan.dart';
 
 class TestPlanTile extends StatelessWidget {
   final TestPlanEntity plan;
@@ -14,12 +14,7 @@ class TestPlanTile extends StatelessWidget {
       subtitle: Text(plan.description ?? ''),
       trailing: const Icon(Icons.chevron_right),
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => TestCaseListPage(testPlanId: plan.id),
-          ),
-        );
+        context.go('/plans/${plan.id}');
       },
     );
   }

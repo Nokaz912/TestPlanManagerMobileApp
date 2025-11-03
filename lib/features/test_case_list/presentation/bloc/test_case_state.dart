@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/test_case.dart';
+import '../../../test_plan_list/domain/entities/test_case.dart';
 
 enum TestCaseStatus { initial, loading, success, failure }
 

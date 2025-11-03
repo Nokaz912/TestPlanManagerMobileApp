@@ -223,9 +223,14 @@ class AppDatabase extends _$AppDatabase {
           description: const Value('Zagnieżdżony moduł B'),
           projectId: 'project_1',
           parentModuleId: const Value('module_2')),
+
+      ModulesCompanion.insert(id: 'submodule_3',
+          name: 'Podmoduł AC',
+          description: const Value('Zagnieżdżony moduł AC'),
+          projectId: 'project_1',
+          parentModuleId: const Value('submodule_1')),
       ]);
 
-      // 🧪 Plany testowe
       b.insertAll(testPlans, [
         TestPlansCompanion.insert(
           id: 'plan_1',

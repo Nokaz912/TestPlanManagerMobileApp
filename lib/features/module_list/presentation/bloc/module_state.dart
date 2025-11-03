@@ -1,19 +1,15 @@
 import 'package:equatable/equatable.dart';
-import '../../../test_plan_list/domain/entities/test_plan.dart';
 import '../../domain/entities/module.dart';
+import '../../domain/entities/test_plan.dart';
 
-/// Status ładowania danych modułów
+/// Ogólny status ładowania modułów i test planów.
 enum ModuleStatus { initial, loading, success, failure }
 
 class ModuleState extends Equatable {
   final ModuleStatus status;
-
-  final List<ModuleEntity> modules;
-
-  final Map<String, List<ModuleEntity>> submodules;
-
-  final Map<String, List<TestPlanEntity>> testPlans;
-
+  final List<ModuleEntity> modules; // moduły główne projektu
+  final Map<String, List<ModuleEntity>> submodules; // submoduły po moduleId
+  final Map<String, List<TestPlanEntity>> testPlans; // test plany po moduleId
   final String? errorMessage;
 
   const ModuleState({

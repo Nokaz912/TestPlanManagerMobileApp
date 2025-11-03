@@ -7,15 +7,17 @@ abstract class TestPlanEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class GetAllTestPlansEvent extends TestPlanEvent {
-  const GetAllTestPlansEvent();
+class GetTestCasesForPlanEvent extends TestPlanEvent {
+  final String planId;
+
+  const GetTestCasesForPlanEvent(this.planId);
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [planId];
 }
 
-class GetTestPlansForModuleEvent extends TestPlanEvent {
-  final String moduleId;
-
-  const GetTestPlansForModuleEvent(this.moduleId);
-}
+// class GetTestPlansForModuleEvent extends TestPlanEvent {
+//   final String moduleId;
+//
+//   const GetTestPlansForModuleEvent(this.moduleId);
+// }

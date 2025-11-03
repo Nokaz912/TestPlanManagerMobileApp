@@ -1,34 +1,23 @@
-import 'package:test_plan_manager_app/features/test_plan_list/data/models/dtos/test_plan_dto.dart';
+import 'package:test_plan_manager_app/database/daos/test_cases_dao.dart';
 import 'package:dartz/dartz.dart';
+import 'package:test_plan_manager_app/features/test_plan_list/data/models/dtos/test_case_dto.dart';
 import '../../../../core/error/failures.dart';
-import '../../../../database/daos/test_plans_dao.dart';
-import '../../domain/entities/test_plan.dart';
+import '../../domain/entities/test_case.dart';
 import '../../domain/repositories/test_plan_repository.dart';
 
 class TestPlanRepositoryImpl implements TestPlanRepository {
-  final TestPlansDao dao;
+  final TestCasesDao dao;
 
   TestPlanRepositoryImpl(this.dao);
 
   @override
-  Future<Either<Failure, List<TestPlanEntity>>> getAllPlans() async {
+  Future<Either<Failure, List<TestCaseEntity>>> getCasesForPlan(String planId) async {
     try {
-      final plans = await dao.getAll();
-      final entities = plans.map((p) => p.toEntity()).toList();
+      final testCases = await dao.getCasesForPlan(planId);
+      final entities = testCases.map((e) => e.toEntity()).toList();
       return Right(entities);
     } catch (e) {
-      return Left(DatabaseFailure(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<TestPlanEntity>>> getPlansForModule(String moduleId) async {
-    try {
-      final plans = await dao.getPlansByModuleId(moduleId);
-      final entities = plans.map((p) => p.toEntity()).toList();
-      return Right(entities);
-    } catch (e) {
-      return Left(DatabaseFailure(e.toString()));
+      return Left(DatabaseFailure('Błąd pobierania test case\'ów: $e'));
     }
   }
 
