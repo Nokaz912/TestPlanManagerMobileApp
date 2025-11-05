@@ -44,7 +44,7 @@ final GoRouter router = GoRouter(
           name: 'modules',
           builder: (context, state) {
             final projectId = state.pathParameters['projectId']!;
-            final projectName = state.extra as String? ?? 'Modules'; // domyślnie
+            final projectName = state.extra as String? ?? 'Modules';
             final bloc = context.read<ModuleBloc>();
 
             if (bloc.state.modules.isEmpty) {
@@ -94,7 +94,12 @@ final GoRouter router = GoRouter(
       name: 'testcases',
       builder: (context, state) {
         final planId = state.pathParameters['planId']!;
-        return TestPlanListPage(planId: planId);
+        final extra = state.extra as Map<String, String>? ?? {};
+        return TestPlanListPage(
+          planId: planId,
+          projectId: extra['projectId'] ?? '',
+          moduleId: extra['moduleId'] ?? '',
+        );
       },
     ),
 

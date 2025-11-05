@@ -30,7 +30,6 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
       GetModulesForProjectEvent event,
       Emitter<ModuleState> emit,
       ) async {
-    // 🔹 Jeżeli zmieniliśmy projekt → wyczyść wszystko
     if (state.currentProjectId != event.projectId) {
       emit(const ModuleState.initial());
     }
@@ -59,7 +58,6 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
       ) async {
     final moduleId = event.moduleId;
 
-    // Jeśli już mamy preview — nie ładujemy ponownie
     final alreadyLoaded = (state.submodules[moduleId]?.isNotEmpty ?? false) ||
         (state.testPlans[moduleId]?.isNotEmpty ?? false);
     if (alreadyLoaded) return;
@@ -134,7 +132,6 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
           (plans) => updatedTestPlans[moduleId] = plans,
     );
 
-    // 🔹 2. Aktualizuj ścieżkę
     final updatedVisited = [...state.visitedModules];
     if (!updatedVisited.contains(moduleId)) updatedVisited.add(moduleId);
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../dependency_injection/service_locator.dart' as di;
 import '../../../test_plan_list/presentation/bloc/test_plan_bloc.dart';
 import '../../../test_plan_list/presentation/bloc/test_plan_event.dart';
@@ -8,10 +9,14 @@ import '../widgets/test_case_tile.dart';
 
 class TestPlanListPage extends StatelessWidget {
   final String planId;
+  final String moduleId;
+  final String projectId;
 
   const TestPlanListPage({
     super.key,
     required this.planId,
+    required this.moduleId,
+    required this.projectId
   });
 
   @override
@@ -20,7 +25,14 @@ class TestPlanListPage extends StatelessWidget {
       create: (_) => di.sl<TestPlanBloc>()
         ..add(GetTestCasesForPlanEvent(planId)),
       child: Scaffold(
-        appBar: AppBar(title: const Text('Test Cases')),
+        appBar: AppBar(
+            title: const Text('Test Cases'),
+            leading: IconButton(
+                onPressed: () {
+                  context.go('/modules/$projectId/sub/$moduleId');
+                  },
+                icon: const Icon(Icons.arrow_back))
+          ,),
         body: BlocListener<TestPlanBloc, TestPlanState>(
           listenWhen: (prev, curr) => prev.status != curr.status,
           listener: (context, state) {

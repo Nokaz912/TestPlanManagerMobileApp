@@ -36,17 +36,19 @@ class ModuleListPage extends StatelessWidget {
               visited.removeLast();
               bloc.add(UpdateVisitedModulesEvent(visited));
 
-              // 🔹 Jeśli po cofnięciu mamy jeszcze coś w ścieżce, idziemy tam
+              // 🔹 Cofnięcie o jeden poziom w strukturze modułów
               if (visited.isNotEmpty) {
                 final parentId = visited.last;
-                context.go('/modules/$projectId/sub/$parentId',
-                    extra: projectName);
+                context.go(
+                  '/modules/$projectId/sub/$parentId',
+                  extra: projectName,
+                );
               } else {
-                // 🔹 Brak rodzica → wracamy do listy głównych modułów
+                // 🔹 Brak rodzica → wracamy do listy głównych modułów projektu
                 context.go('/modules/$projectId', extra: projectName);
               }
             } else {
-              // 🔹 Root → wracamy do projektów
+              // 🔹 Root → wracamy do listy projektów
               context.go('/projects');
             }
           },
@@ -54,8 +56,9 @@ class ModuleListPage extends StatelessWidget {
       ),
       body: BlocBuilder<ModuleBloc, ModuleState>(
         builder: (context, state) {
-          final modules =
-          moduleId == null ? state.modules : (state.submodules[moduleId] ?? []);
+          final modules = moduleId == null
+              ? state.modules
+              : (state.submodules[moduleId] ?? []);
           final testPlans =
           moduleId != null ? (state.testPlans[moduleId] ?? []) : const [];
 
@@ -66,9 +69,8 @@ class ModuleListPage extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 🔹 Pasek ścieżki ma się pokazywać zawsze, nawet przy pustych danych
-              if (state.visitedModules.isNotEmpty)
-                buildPathBar(context, state, projectId),
+              // 🔹 Pasek ścieżki zawsze widoczny (nawet przy braku danych)
+              buildPathBar(context, state, projectId),
 
               const Divider(height: 1),
 
@@ -77,8 +79,18 @@ class ModuleListPage extends StatelessWidget {
                     ? const Center(child: Text('No data found'))
                     : ListView(
                   children: [
-                    ...modules.map((m) => ModuleTile(module: m)),
-                    ...testPlans.map((p) => TestPlanTile(plan: p)),
+                    // 🔹 Moduły
+                    ...modules.map(
+                          (m) => ModuleTile(module: m),
+                    ),
+                    // 🔹 Test plany (teraz przekazujemy projectId + moduleId)
+                    ...testPlans.map(
+                          (p) => TestPlanTile(
+                        plan: p,
+                        projectId: projectId,
+                        moduleId: moduleId ?? '',
+                      ),
+                    ),
                   ],
                 ),
               ),
