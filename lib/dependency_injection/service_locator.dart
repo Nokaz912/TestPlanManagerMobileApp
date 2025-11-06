@@ -1,4 +1,9 @@
 import 'package:get_it/get_it.dart';
+import '../core/global/navigation/data/repository/navigation_repository_impl.dart';
+import '../core/global/navigation/domain/repository/navigation_repository.dart';
+import '../core/global/navigation/domain/usecases/get_visited_modules.dart';
+import '../core/global/navigation/domain/usecases/save_visited_modules.dart';
+import '../database/daos/test_steps_dao.dart';
 import '../database/data.dart';
 import '../database/daos/module_dao.dart';
 import '../database/daos/project_dao.dart';
@@ -20,6 +25,7 @@ import '../features/project_list/presentation/bloc/project_bloc.dart';
 
 import '../features/test_case_list/data/repository/test_case_repository_impl.dart';
 import '../features/test_case_list/domain/repository/test_case_repository.dart';
+import '../features/test_case_list/domain/usecases/get_teststeps_for_case.dart';
 import '../features/test_case_list/presentation/bloc/test_case_bloc.dart';
 
 import '../features/test_plan_list/data/repositories/test_plan_repository_impl.dart';
@@ -40,6 +46,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => ModuleDao(db));
   sl.registerLazySingleton(() => TestPlansDao(db));
   sl.registerLazySingleton(() => TestCasesDao(db));
+  sl.registerLazySingleton<TestStepsDao>(() => TestStepsDao(sl()));
 
   // ------------------------------
   // 📁 PROJECTS
@@ -66,6 +73,8 @@ Future<void> init() async {
       getModulesForProject: sl(),
       getSubmodulesForModule: sl(),
       getTestPlansForModule: sl(),
+          saveVisitedModules: sl(),
+          getVisitedModules: sl(),
     ),
   );
 
@@ -81,8 +90,13 @@ Future<void> init() async {
   // ------------------------------
   // ✅ TEST CASES
   // ------------------------------
-  sl.registerLazySingleton<TestCaseRepository>(
-        () => TestCaseRepositoryImpl(sl()),
-  );
-  sl.registerFactory(() => TestCaseBloc(sl()));
+  sl.registerLazySingleton<TestStepRepository>(() => TestStepRepositoryImpl(sl()));
+  sl.registerLazySingleton(() => GetTestStepsForCase(sl()));
+  sl.registerFactory(() => TestStepBloc(getTestStepsForCase: sl()));
+
+  // --- GLOBAL ---
+  sl.registerLazySingleton<NavigationRepository>(() => NavigationRepositoryImpl());
+
+  sl.registerLazySingleton(() => SaveVisitedModules(sl()));
+  sl.registerLazySingleton(() => GetVisitedModules(sl()));
 }

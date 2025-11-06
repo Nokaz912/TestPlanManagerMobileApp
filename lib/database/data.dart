@@ -94,7 +94,7 @@ class TestSteps extends Table {
   IntColumn get stepNumber => integer()();
   TextColumn get description => text()();
   TextColumn get expected => text().nullable()();
-
+  TextColumn get status => text().withDefault(const Constant('NotRun'))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -157,8 +157,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   Future<void> seedInitialData() async {
-    final existingUsers = await (select(users)
-      ..limit(1)).get();
+    final existingUsers = await (select(users)..limit(1)).get();
     if (existingUsers.isNotEmpty) {
       print('✅ Seed pominięty – dane już istnieją');
       return;
@@ -203,8 +202,7 @@ class AppDatabase extends _$AppDatabase {
         ProjectsCompanion.insert(
           id: 'project_2',
           name: 'System Backend API',
-          description: const Value(
-              'Serwis REST API do zarządzania zamówieniami'),
+          description: const Value('Serwis REST API do zarządzania zamówieniami'),
           createdAtUtc: Value(now),
         ),
         ProjectsCompanion.insert(
@@ -215,9 +213,9 @@ class AppDatabase extends _$AppDatabase {
         ),
       ]);
 
-      // 📦 Moduły
+      // 📦 Moduły (rozszerzone)
       b.insertAll(modules, [
-        // --- Projekt 1: Aplikacja Mobilna ---
+        // --- Projekt 1: Aplikacja mobilna ---
         ModulesCompanion.insert(
           id: 'mobile_ui',
           name: 'Interfejs użytkownika',
@@ -242,8 +240,20 @@ class AppDatabase extends _$AppDatabase {
           description: const Value('Wspólne komponenty i konfiguracje'),
           projectId: 'project_1',
         ),
+        ModulesCompanion.insert(
+          id: 'mobile_profile',
+          name: 'Profil użytkownika',
+          description: const Value('Edycja profilu i avatar użytkownika'),
+          projectId: 'project_1',
+        ),
+        ModulesCompanion.insert(
+          id: 'mobile_notifications',
+          name: 'Powiadomienia push',
+          description: const Value('Integracja z Firebase Cloud Messaging'),
+          projectId: 'project_1',
+        ),
 
-        // --- Głębokie zagnieżdżenie (6 poziomów) ---
+        // --- Zagnieżdżone moduły ---
         ModulesCompanion.insert(
           id: 'nested_lvl1',
           name: 'Moduł poziom 1',
@@ -286,7 +296,7 @@ class AppDatabase extends _$AppDatabase {
           parentModuleId: const Value('nested_lvl5'),
         ),
 
-        // --- Projekt 2: Backend API ---
+        // --- Projekt 2: Backend ---
         ModulesCompanion.insert(
           id: 'api_auth',
           name: 'Autoryzacja JWT',
@@ -300,10 +310,29 @@ class AppDatabase extends _$AppDatabase {
           projectId: 'project_2',
         ),
         ModulesCompanion.insert(
+          id: 'api_inventory',
+          name: 'Magazyn i stany',
+          description: const Value('Zarządzanie produktami i zapasami'),
+          projectId: 'project_2',
+        ),
+        ModulesCompanion.insert(
+          id: 'api_invoices',
+          name: 'Fakturowanie',
+          description: const Value('Generowanie faktur i PDF'),
+          projectId: 'project_2',
+        ),
+        ModulesCompanion.insert(
           id: 'api_payments',
           name: 'Integracje płatności',
           description: const Value('Webhooki i API PayU / Stripe'),
           projectId: 'project_2',
+        ),
+        ModulesCompanion.insert(
+          id: 'api_payments_stripe',
+          name: 'Stripe Integration',
+          description: const Value('Obsługa płatności Stripe'),
+          projectId: 'project_2',
+          parentModuleId: const Value('api_payments'),
         ),
         ModulesCompanion.insert(
           id: 'api_reporting',
@@ -317,13 +346,6 @@ class AppDatabase extends _$AppDatabase {
           description: const Value('Moduł powiadomień transakcyjnych'),
           projectId: 'project_2',
         ),
-        ModulesCompanion.insert(
-          id: 'api_payments_stripe',
-          name: 'Stripe Integration',
-          description: const Value('Obsługa płatności Stripe'),
-          projectId: 'project_2',
-          parentModuleId: const Value('api_payments'),
-        ),
 
         // --- Projekt 3: Portal Web ---
         ModulesCompanion.insert(
@@ -336,6 +358,12 @@ class AppDatabase extends _$AppDatabase {
           id: 'admin_users',
           name: 'Zarządzanie użytkownikami',
           description: const Value('CRUD użytkowników i role'),
+          projectId: 'project_3',
+        ),
+        ModulesCompanion.insert(
+          id: 'admin_audit',
+          name: 'Audyt i historia zmian',
+          description: const Value('Śledzenie aktywności użytkowników'),
           projectId: 'project_3',
         ),
         ModulesCompanion.insert(
@@ -353,23 +381,14 @@ class AppDatabase extends _$AppDatabase {
         ),
       ]);
 
-      // 🧪 Test plany porozrzucane po różnych poziomach
+      // 🧪 Test plany
       b.insertAll(testPlans, [
-        // --- Projekt 1 ---
         TestPlansCompanion.insert(
           id: 'plan_mobile_auth',
           name: 'Testy autoryzacji',
           description: const Value('Testy logowania i rejestracji użytkownika'),
           moduleId: 'mobile_auth',
           ownerUserId: const Value('user_2'),
-          lastModifiedUtc: Value(now),
-        ),
-        TestPlansCompanion.insert(
-          id: 'plan_nested_lvl6',
-          name: 'Testy najgłębszego poziomu',
-          description: const Value('Testy dla poziomu 6'),
-          moduleId: 'nested_lvl6',
-          ownerUserId: const Value('user_1'),
           lastModifiedUtc: Value(now),
         ),
         TestPlansCompanion.insert(
@@ -380,32 +399,12 @@ class AppDatabase extends _$AppDatabase {
           ownerUserId: const Value('user_3'),
           lastModifiedUtc: Value(now),
         ),
-
-        // --- Projekt 2 ---
         TestPlansCompanion.insert(
           id: 'plan_api_orders',
           name: 'Testy API zamówień',
           description: const Value('Walidacja endpointów zamówień'),
           moduleId: 'api_orders',
           ownerUserId: const Value('user_2'),
-          lastModifiedUtc: Value(now),
-        ),
-        TestPlansCompanion.insert(
-          id: 'plan_api_payments_stripe',
-          name: 'Testy integracji Stripe',
-          description: const Value('Testy webhooków i edge-case’ów płatności'),
-          moduleId: 'api_payments_stripe',
-          ownerUserId: const Value('user_3'),
-          lastModifiedUtc: Value(now),
-        ),
-
-        // --- Projekt 3 ---
-        TestPlansCompanion.insert(
-          id: 'plan_admin_logs',
-          name: 'Testy logów',
-          description: const Value('Testy widoku logów i filtrowania'),
-          moduleId: 'admin_logs',
-          ownerUserId: const Value('user_1'),
           lastModifiedUtc: Value(now),
         ),
         TestPlansCompanion.insert(
@@ -418,55 +417,50 @@ class AppDatabase extends _$AppDatabase {
         ),
       ]);
 
-      // 📄 Przypadki testowe + 💬 komentarze
       final List<TestCasesCompanion> allCases = [];
-      final List<CommentsCompanion> allComments = [];
+      final List<TestStepsCompanion> allSteps = [];
 
       final allPlans = [
         'plan_mobile_auth',
-        'plan_nested_lvl6',
         'plan_mobile_ui',
         'plan_api_orders',
-        'plan_api_payments_stripe',
         'plan_admin_dashboard',
-        'plan_admin_logs',
       ];
 
       for (final planId in allPlans) {
-        for (var caseIndex = 1; caseIndex <= 5; caseIndex++) {
+        for (var caseIndex = 1; caseIndex <= 3; caseIndex++) {
           final caseId = 'case_${planId}_$caseIndex';
           allCases.add(TestCasesCompanion.insert(
             id: caseId,
             planId: planId,
-            title: 'TC $caseIndex - ${planId.replaceAll("_", " ")
-                .toUpperCase()}',
-            status: caseIndex.isEven ? 'Passed' : 'NotRun',
+            title: 'Test Case $caseIndex - ${planId.toUpperCase()}',
+            status: caseIndex == 1
+                ? 'Passed'
+                : (caseIndex == 2 ? 'Failed' : 'NotRun'),
             assignedToUserId: const Value('user_1'),
             expectedResult: Value('Oczekiwany wynik testu $caseIndex'),
             lastModifiedUtc: Value(now),
           ));
 
-          for (var commentIndex = 1;
-          commentIndex <= (caseIndex % 3) + 1;
-          commentIndex++) {
-            allComments.add(CommentsCompanion.insert(
-              id: 'comment_${caseId}_$commentIndex',
+          for (var stepIndex = 1; stepIndex <= 4; stepIndex++) {
+            allSteps.add(TestStepsCompanion.insert(
+              id: 'step_${caseId}_$stepIndex',
               testCaseId: caseId,
-              content: 'Komentarz $commentIndex do $caseId',
-              createdByUserId: const Value('user_2'),
-              createdAtUtc: Value(now),
+              stepNumber: stepIndex,
+              description: 'Krok $stepIndex w teście $caseId',
+              expected: Value('Oczekiwany rezultat kroku $stepIndex'),
             ));
           }
         }
       }
 
       b.insertAll(testCases, allCases);
-      b.insertAll(comments, allComments);
+      b.insertAll(testSteps, allSteps);
     });
 
-    print(
-        '✅ Seed zakończony — 3 projekty, głęboko zagnieżdżone moduły, plany i testy utworzone');
+    print('✅ Seed zakończony — projekty, moduły, plany, test case’y i test step’y utworzone');
   }
+
 }
   LazyDatabase _openConnection() {
   return LazyDatabase(() async {

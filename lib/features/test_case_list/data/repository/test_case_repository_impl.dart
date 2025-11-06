@@ -1,15 +1,32 @@
 import 'package:dartz/dartz.dart';
-import 'package:test_plan_manager_app/features/test_plan_list/data/models/dtos/test_case_dto.dart';
-
 import '../../../../core/error/failures.dart';
-import '../../../../database/daos/test_cases_dao.dart';
-import '../../../test_plan_list/domain/entities/test_case.dart';
+import '../../../../database/daos/test_steps_dao.dart';
+import '../../domain/entities/test_step.dart';
 import '../../domain/repository/test_case_repository.dart';
 
-class TestCaseRepositoryImpl implements TestCaseRepository {
-  final TestCasesDao dao;
 
-  TestCaseRepositoryImpl(this.dao);
+class TestStepRepositoryImpl implements TestStepRepository {
+  final TestStepsDao dao;
 
+  TestStepRepositoryImpl(this.dao);
 
+  @override
+  Future<Either<Failure, List<TestStepEntity>>> getTestStepsForCase(String testCaseId) async {
+    try {
+      final rows = await dao.getStepsForCase(testCaseId);
+      final steps = rows
+          .map((s) => TestStepEntity(
+        id: s.id,
+        testCaseId: s.testCaseId,
+        stepNumber: s.stepNumber,
+        description: s.description,
+        expected: s.expected,
+        status: s.status,
+      ))
+          .toList();
+      return Right(steps);
+    } catch (e) {
+      return Left(DatabaseFailure('Nie udało się pobrać kroków testu: $e'));
+    }
+  }
 }

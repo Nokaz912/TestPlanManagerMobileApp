@@ -1,36 +1,36 @@
 import 'package:equatable/equatable.dart';
-import '../../../test_plan_list/domain/entities/test_case.dart';
+import '../../domain/entities/test_step.dart';
 
-enum TestCaseStatus { initial, loading, success, failure }
+enum TestStepStatus { initial, loading, success, failure }
 
-class TestCaseState extends Equatable {
-  final TestCaseStatus status;
-  final List<TestCaseEntity> testCases;
+class TestStepState extends Equatable {
+  final TestStepStatus status;
+  final List<TestStepEntity> steps;
   final String? errorMessage;
 
-  const TestCaseState({
+  const TestStepState({
     required this.status,
-    required this.testCases,
+    required this.steps,
     this.errorMessage,
   });
 
-  const TestCaseState.initial()
-      : status = TestCaseStatus.initial,
-        testCases = const [],
+  const TestStepState.initial()
+      : status = TestStepStatus.initial,
+        steps = const [],
         errorMessage = null;
 
-  TestCaseState copyWith({
-    TestCaseStatus? status,
-    List<TestCaseEntity>? testCases,
+  TestStepState copyWith({
+    TestStepStatus? status,
+    List<TestStepEntity>? steps,
     String? errorMessage,
   }) {
-    return TestCaseState(
+    return TestStepState(
       status: status ?? this.status,
-      testCases: testCases ?? this.testCases,
-      errorMessage: errorMessage,
+      steps: steps ?? this.steps,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 
   @override
-  List<Object?> get props => [status, testCases, errorMessage];
+  List<Object?> get props => [status, steps, errorMessage];
 }

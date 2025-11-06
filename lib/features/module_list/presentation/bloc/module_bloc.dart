@@ -1,4 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/global/navigation/domain/usecases/get_visited_modules.dart';
+import '../../../../core/global/navigation/domain/usecases/save_visited_modules.dart';
+import '../../../../dependency_injection/service_locator.dart';
 import '../../domain/entities/module.dart';
 import '../../domain/entities/test_plan.dart';
 import '../../domain/usecases/get_modules_for_project.dart';
@@ -11,21 +14,26 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
   final GetModulesForProject getModulesForProject;
   final GetSubmodulesForModule getSubmodulesForModule;
   final GetTestPlansForModule getTestPlansForModule;
+  final SaveVisitedModules saveVisitedModules;
+  final GetVisitedModules getVisitedModules;
 
   ModuleBloc({
     required this.getModulesForProject,
     required this.getSubmodulesForModule,
     required this.getTestPlansForModule,
+    required this.saveVisitedModules,
+    required this.getVisitedModules,
   }) : super(const ModuleState.initial()) {
     on<GetModulesForProjectEvent>(_onGetModulesForProject);
     on<GetSubmodulesForModuleEvent>(_onGetSubmodulesForModule);
     on<LoadPreviewForModuleEvent>(_onLoadPreviewForModule);
-    on<NavigateToModuleEvent>(_onNavigateToModule);
-    on<UpdateVisitedModulesEvent>((event, emit) {
-      emit(state.copyWith(visitedModules: event.visited));
-    });
+    on<NavigateBackEvent>(_onNavigateBack);
+    on<SetVisitedPathEvent>(_onSetVisitedPath);
   }
 
+  // ---------------------------------------------------------------------------
+  // 1️⃣ Pobranie głównych modułów projektu
+  // ---------------------------------------------------------------------------
   Future<void> _onGetModulesForProject(
       GetModulesForProjectEvent event,
       Emitter<ModuleState> emit,
@@ -43,15 +51,22 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
         status: ModuleStatus.failure,
         errorMessage: failure.message,
       )),
-          (modules) => emit(state.copyWith(
-        status: ModuleStatus.success,
-        modules: modules,
-        currentProjectId: event.projectId, // <-- dodaj to do stanu
-      )),
+          (modules) {
+        // 🔹 Wczytaj poprzednią ścieżkę (jeśli istnieje)
+        final visited = getVisitedModules(event.projectId);
+        emit(state.copyWith(
+          status: ModuleStatus.success,
+          modules: modules,
+          currentProjectId: event.projectId,
+          visitedModules: visited,
+        ));
+      },
     );
   }
 
-
+  // ---------------------------------------------------------------------------
+  // 2️⃣ Podgląd dla kafelka (maks. 3 elementy)
+  // ---------------------------------------------------------------------------
   Future<void> _onLoadPreviewForModule(
       LoadPreviewForModuleEvent event,
       Emitter<ModuleState> emit,
@@ -62,23 +77,24 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
         (state.testPlans[moduleId]?.isNotEmpty ?? false);
     if (alreadyLoaded) return;
 
-    // 🔹 Pobierz tylko dzieci 1 poziomu (nie rekurencyjnie)
     final submodulesResult =
     await getSubmodulesForModule(ParentModuleIdParams(moduleId));
     final testPlansResult =
     await getTestPlansForModule(ModuleIdParams(moduleId));
 
-    // 🔹 Kopie aktualnych map
     final updatedSubmodules =
     Map<String, List<ModuleEntity>>.from(state.submodules);
     final updatedTestPlans =
     Map<String, List<TestPlanEntity>>.from(state.testPlans);
 
-    // 🔹 Zapisz maksymalnie 3 podglądy (żeby kafelek był lekki)
-    submodulesResult.fold((_) => null,
-            (subs) => updatedSubmodules[moduleId] = subs.take(3).toList());
-    testPlansResult.fold((_) => null,
-            (plans) => updatedTestPlans[moduleId] = plans.take(3).toList());
+    submodulesResult.fold(
+          (_) => null,
+          (subs) => updatedSubmodules[moduleId] = subs.take(3).toList(),
+    );
+    testPlansResult.fold(
+          (_) => null,
+          (plans) => updatedTestPlans[moduleId] = plans.take(3).toList(),
+    );
 
     emit(state.copyWith(
       submodules: updatedSubmodules,
@@ -86,23 +102,28 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
     ));
   }
 
+  // ---------------------------------------------------------------------------
+  // 3️⃣ Pobranie submodułów i planów testowych
+  // ---------------------------------------------------------------------------
   Future<void> _onGetSubmodulesForModule(
       GetSubmodulesForModuleEvent event,
       Emitter<ModuleState> emit,
       ) async {
     final moduleId = event.moduleId;
+    final projectId = state.currentProjectId;
+    if (projectId == null) return;
 
-    // 🔹 1. Jeśli już mamy cache — użyj
+    // 🔹 Sprawdź cache
     final alreadyCached = state.submodules.containsKey(moduleId);
     if (alreadyCached) {
-      // Dodaj moduł do ścieżki odwiedzonych
-      final updatedVisited = [...state.visitedModules];
-      if (!updatedVisited.contains(moduleId)) updatedVisited.add(moduleId);
-
-      emit(state.copyWith(
-        status: ModuleStatus.success,
-        visitedModules: updatedVisited,
-      ));
+      final visited = getVisitedModules(projectId);
+      if (!visited.contains(moduleId)) {
+        final updatedVisited = [...visited, moduleId];
+        saveVisitedModules(projectId, updatedVisited);
+        emit(state.copyWith(visitedModules: updatedVisited));
+      } else {
+        emit(state.copyWith(visitedModules: visited));
+      }
       return;
     }
 
@@ -113,8 +134,10 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
     final testPlansResult =
     await getTestPlansForModule(ModuleIdParams(moduleId));
 
-    final updatedSubmodules = Map<String, List<ModuleEntity>>.from(state.submodules);
-    final updatedTestPlans = Map<String, List<TestPlanEntity>>.from(state.testPlans);
+    final updatedSubmodules =
+    Map<String, List<ModuleEntity>>.from(state.submodules);
+    final updatedTestPlans =
+    Map<String, List<TestPlanEntity>>.from(state.testPlans);
 
     submodulesResult.fold(
           (failure) => emit(state.copyWith(
@@ -132,8 +155,10 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
           (plans) => updatedTestPlans[moduleId] = plans,
     );
 
-    final updatedVisited = [...state.visitedModules];
-    if (!updatedVisited.contains(moduleId)) updatedVisited.add(moduleId);
+    // 🔹 Aktualizacja ścieżki
+    final currentVisited = getVisitedModules(projectId);
+    final updatedVisited = [...currentVisited, moduleId];
+    saveVisitedModules(projectId, updatedVisited);
 
     emit(state.copyWith(
       status: ModuleStatus.success,
@@ -142,24 +167,31 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
       visitedModules: updatedVisited,
     ));
   }
-  Future<void> _onNavigateToModule(
-      NavigateToModuleEvent event,
+
+  Future<void> _onNavigateBack(
+      NavigateBackEvent event,
       Emitter<ModuleState> emit,
       ) async {
-    final moduleId = event.moduleId;
+    final projectId = event.projectId;
+    final visited = getVisitedModules(projectId);
 
-    if (moduleId == null) {
+    if (visited.isNotEmpty) {
+      final shortened = List<String>.from(visited)..removeLast();
+      saveVisitedModules(projectId, shortened);
+      emit(state.copyWith(visitedModules: shortened));
+    } else {
+      saveVisitedModules(projectId, []);
       emit(state.copyWith(visitedModules: []));
-      return;
     }
-
-    final index = state.visitedModules.indexOf(moduleId);
-    if (index == -1) return;
-
-    final trimmedVisited = state.visitedModules.sublist(0, index + 1);
-
-    emit(state.copyWith(visitedModules: trimmedVisited));
   }
 
-
+  Future<void> _onSetVisitedPath(
+      SetVisitedPathEvent event,
+      Emitter<ModuleState> emit,
+      ) async {
+    // zapisz w repo
+    saveVisitedModules(event.projectId, List<String>.from(event.visited));
+    // odśwież UI stanem
+    emit(state.copyWith(visitedModules: List<String>.from(event.visited)));
+  }
 }

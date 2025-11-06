@@ -16,29 +16,35 @@ class TestPlanListPage extends StatelessWidget {
     super.key,
     required this.planId,
     required this.moduleId,
-    required this.projectId
+    required this.projectId,
   });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => di.sl<TestPlanBloc>()
-        ..add(GetTestCasesForPlanEvent(planId)),
+      create: (_) => di.sl<TestPlanBloc>()..add(GetTestCasesForPlanEvent(planId)),
       child: Scaffold(
         appBar: AppBar(
-            title: const Text('Test Cases'),
-            leading: IconButton(
-                onPressed: () {
-                  context.go('/modules/$projectId/sub/$moduleId');
-                  },
-                icon: const Icon(Icons.arrow_back))
-          ,),
+          title: const Text('Test Cases'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            tooltip: 'Back',
+            onPressed: () {
+              // 🔹 Naturalny powrót o jeden poziom wstecz (do modułu)
+              context.pop();
+            },
+          ),
+        ),
         body: BlocListener<TestPlanBloc, TestPlanState>(
           listenWhen: (prev, curr) => prev.status != curr.status,
           listener: (context, state) {
             if (state.status == TestPlanStatus.failure) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.errorMessage ?? 'Failed to load test cases')),
+                SnackBar(
+                  content: Text(
+                    state.errorMessage ?? 'Failed to load test cases',
+                  ),
+                ),
               );
             }
           },
@@ -62,15 +68,18 @@ class TestPlanListPage extends StatelessWidget {
 
               return RefreshIndicator(
                 onRefresh: () async {
-                  context
-                      .read<TestPlanBloc>()
-                      .add(GetTestCasesForPlanEvent(planId));
+                  context.read<TestPlanBloc>().add(GetTestCasesForPlanEvent(planId));
                 },
                 child: ListView.builder(
                   itemCount: cases.length,
                   itemBuilder: (context, index) {
                     final testCase = cases[index];
-                    return TestCaseTile(testCase: testCase);
+                    return TestCaseTile(
+                      testCase: testCase,
+                      projectId: projectId,
+                      moduleId: moduleId,
+                      planId: planId,
+                    );
                   },
                 ),
               );

@@ -42,11 +42,9 @@ class _ModuleTileState extends State<ModuleTile> {
 
     bloc.add(GetSubmodulesForModuleEvent(m.id));
 
-    // Pobieramy nazwę projektu z aktualnego widoku (z Route.extra)
     final routerState = GoRouterState.of(context);
     final projectName = routerState.extra as String? ?? 'Modules';
 
-    // 🔹 Przekazujemy nazwę projektu dalej
     context.go(
       '/modules/${m.projectId}/sub/${m.id}',
       extra: projectName,
@@ -77,7 +75,6 @@ class _ModuleTileState extends State<ModuleTile> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 🔹 Lewa część — otwiera/zamyka preview
             Expanded(
               child: InkWell(
                 onTap: _togglePreview,

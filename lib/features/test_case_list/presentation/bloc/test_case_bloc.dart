@@ -1,18 +1,34 @@
-import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:test_plan_manager_app/features/test_case_list/presentation/bloc/test_case_event.dart';
 import 'package:test_plan_manager_app/features/test_case_list/presentation/bloc/test_case_state.dart';
 
-import '../../../../core/error/failures.dart';
-import '../../../test_plan_list/domain/entities/test_case.dart';
-import '../../../test_plan_list/domain/usecases/get_test_cases_for_plan.dart';
+import '../../domain/usecases/get_teststeps_for_case.dart';
 
-class TestCaseBloc extends Bloc<TestCaseEvent, TestCaseState> {
-  final GetTestCasesForPlan getTestCasesForPlan;
+class TestStepBloc extends Bloc<TestStepEvent, TestStepState> {
+  final GetTestStepsForCase getTestStepsForCase;
 
-  TestCaseBloc(this.getTestCasesForPlan) : super(const TestCaseState.initial()) {
-
+  TestStepBloc({required this.getTestStepsForCase})
+      : super(const TestStepState.initial()) {
+    on<GetTestStepsForCaseEvent>(_onGetTestStepsForCase);
   }
 
+  Future<void> _onGetTestStepsForCase(
+      GetTestStepsForCaseEvent event,
+      Emitter<TestStepState> emit,
+      ) async {
+    emit(state.copyWith(status: TestStepStatus.loading));
 
+    final result = await getTestStepsForCase(event.testCaseId);
+
+    result.fold(
+          (failure) => emit(state.copyWith(
+        status: TestStepStatus.failure,
+        errorMessage: failure.message,
+      )),
+          (steps) => emit(state.copyWith(
+        status: TestStepStatus.success,
+        steps: steps,
+      )),
+    );
+  }
 }

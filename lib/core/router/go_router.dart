@@ -11,7 +11,7 @@ import '../../features/project_list/presentation/bloc/project_event.dart';
 import '../../features/project_list/presentation/pages/project_list_page.dart';
 import '../../features/test_case_list/presentation/bloc/test_case_bloc.dart';
 import '../../features/test_case_list/presentation/bloc/test_case_event.dart';
-import '../../features/test_case_list/presentation/pages/test_cases_list_page.dart';
+import '../../features/test_case_list/presentation/pages/test_cases_page.dart';
 import '../../features/test_plan_list/presentation/bloc/test_plan_bloc.dart';
 import '../../features/test_plan_list/presentation/bloc/test_plan_event.dart';
 import '../../features/test_plan_list/presentation/pages/test_plan_list_page.dart';
@@ -104,17 +104,19 @@ final GoRouter router = GoRouter(
     ),
 
 
-    // GoRoute(
-    //   path: '/cases/:planId',
-    //   name: 'cases',
-    //   builder: (context, state) {
-    //     final planId = state.pathParameters['planId']!;
-    //     return BlocProvider(
-    //       create: (_) =>
-    //       sl<TestCaseBloc>()..add(GetTestCasesForPlanEvent(planId)),
-    //       child: TestCaseListPage(testPlanId: planId),
-    //     );
-    //   },
-    // ),
+    GoRoute(
+      path: '/cases/:caseId/steps',
+      name: 'teststeps',
+      builder: (context, state) {
+        final caseId = state.pathParameters['caseId']!;
+        final extra = state.extra as Map<String, String>? ?? {};
+        return TestCasePage(
+          testCaseId: caseId,
+          planId: extra['planId'] ?? '',
+          moduleId: extra['moduleId'] ?? '',
+          projectId: extra['projectId'] ?? '',
+        );
+      },
+    ),
   ],
 );

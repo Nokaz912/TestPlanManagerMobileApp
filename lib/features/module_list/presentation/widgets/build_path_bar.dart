@@ -23,7 +23,8 @@ Widget buildPathBar(
         children: [
           InkWell(
             onTap: () {
-              bloc.add(const NavigateToModuleEvent(null));
+              // Root: ustaw pustą ścieżkę i wróć na root
+              bloc.add(SetVisitedPathEvent(projectId, const []));
               context.go('/modules/$projectId');
             },
             child: const Text(
@@ -37,25 +38,25 @@ Widget buildPathBar(
           if (visited.isNotEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 4),
-              child:
-              Icon(Icons.chevron_right, size: 16, color: Colors.black54),
+              child: Icon(Icons.chevron_right, size: 16, color: Colors.black54),
             ),
           for (int i = 0; i < visited.length; i++) ...[
             InkWell(
               onTap: i < visited.length - 1
                   ? () {
                 final targetId = visited[i];
-                bloc.add(NavigateToModuleEvent(targetId));
+                // przytnij do klikniętego elementu (włącznie)
+                final shortened = visited.sublist(0, i + 1);
+                bloc.add(SetVisitedPathEvent(projectId, shortened));
                 context.go('/modules/$projectId/sub/$targetId');
               }
-                  : null,
+                  : null, // ostatni (bieżący) nieklikalny
               child: Text(
                 visited[i],
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color:
-                  i < visited.length - 1 ? Colors.blue : Colors.black87,
+                  color: i < visited.length - 1 ? Colors.blue : Colors.black87,
                   decoration: i < visited.length - 1
                       ? TextDecoration.underline
                       : TextDecoration.none,
@@ -65,8 +66,7 @@ Widget buildPathBar(
             if (i < visited.length - 1)
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4),
-                child: Icon(Icons.chevron_right,
-                    size: 16, color: Colors.black54),
+                child: Icon(Icons.chevron_right, size: 16, color: Colors.black54),
               ),
           ],
         ],

@@ -2587,6 +2587,16 @@ class $TestStepsTable extends TestSteps
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('NotRun'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2594,6 +2604,7 @@ class $TestStepsTable extends TestSteps
     stepNumber,
     description,
     expected,
+    status,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2648,6 +2659,12 @@ class $TestStepsTable extends TestSteps
         expected.isAcceptableOrUnknown(data['expected']!, _expectedMeta),
       );
     }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
     return context;
   }
 
@@ -2681,6 +2698,11 @@ class $TestStepsTable extends TestSteps
         DriftSqlType.string,
         data['${effectivePrefix}expected'],
       ),
+      status:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}status'],
+          )!,
     );
   }
 
@@ -2696,12 +2718,14 @@ class TestStep extends DataClass implements Insertable<TestStep> {
   final int stepNumber;
   final String description;
   final String? expected;
+  final String status;
   const TestStep({
     required this.id,
     required this.testCaseId,
     required this.stepNumber,
     required this.description,
     this.expected,
+    required this.status,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2713,6 +2737,7 @@ class TestStep extends DataClass implements Insertable<TestStep> {
     if (!nullToAbsent || expected != null) {
       map['expected'] = Variable<String>(expected);
     }
+    map['status'] = Variable<String>(status);
     return map;
   }
 
@@ -2726,6 +2751,7 @@ class TestStep extends DataClass implements Insertable<TestStep> {
           expected == null && nullToAbsent
               ? const Value.absent()
               : Value(expected),
+      status: Value(status),
     );
   }
 
@@ -2740,6 +2766,7 @@ class TestStep extends DataClass implements Insertable<TestStep> {
       stepNumber: serializer.fromJson<int>(json['stepNumber']),
       description: serializer.fromJson<String>(json['description']),
       expected: serializer.fromJson<String?>(json['expected']),
+      status: serializer.fromJson<String>(json['status']),
     );
   }
   @override
@@ -2751,6 +2778,7 @@ class TestStep extends DataClass implements Insertable<TestStep> {
       'stepNumber': serializer.toJson<int>(stepNumber),
       'description': serializer.toJson<String>(description),
       'expected': serializer.toJson<String?>(expected),
+      'status': serializer.toJson<String>(status),
     };
   }
 
@@ -2760,12 +2788,14 @@ class TestStep extends DataClass implements Insertable<TestStep> {
     int? stepNumber,
     String? description,
     Value<String?> expected = const Value.absent(),
+    String? status,
   }) => TestStep(
     id: id ?? this.id,
     testCaseId: testCaseId ?? this.testCaseId,
     stepNumber: stepNumber ?? this.stepNumber,
     description: description ?? this.description,
     expected: expected.present ? expected.value : this.expected,
+    status: status ?? this.status,
   );
   TestStep copyWithCompanion(TestStepsCompanion data) {
     return TestStep(
@@ -2777,6 +2807,7 @@ class TestStep extends DataClass implements Insertable<TestStep> {
       description:
           data.description.present ? data.description.value : this.description,
       expected: data.expected.present ? data.expected.value : this.expected,
+      status: data.status.present ? data.status.value : this.status,
     );
   }
 
@@ -2787,14 +2818,15 @@ class TestStep extends DataClass implements Insertable<TestStep> {
           ..write('testCaseId: $testCaseId, ')
           ..write('stepNumber: $stepNumber, ')
           ..write('description: $description, ')
-          ..write('expected: $expected')
+          ..write('expected: $expected, ')
+          ..write('status: $status')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode =>
-      Object.hash(id, testCaseId, stepNumber, description, expected);
+      Object.hash(id, testCaseId, stepNumber, description, expected, status);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2803,7 +2835,8 @@ class TestStep extends DataClass implements Insertable<TestStep> {
           other.testCaseId == this.testCaseId &&
           other.stepNumber == this.stepNumber &&
           other.description == this.description &&
-          other.expected == this.expected);
+          other.expected == this.expected &&
+          other.status == this.status);
 }
 
 class TestStepsCompanion extends UpdateCompanion<TestStep> {
@@ -2812,6 +2845,7 @@ class TestStepsCompanion extends UpdateCompanion<TestStep> {
   final Value<int> stepNumber;
   final Value<String> description;
   final Value<String?> expected;
+  final Value<String> status;
   final Value<int> rowid;
   const TestStepsCompanion({
     this.id = const Value.absent(),
@@ -2819,6 +2853,7 @@ class TestStepsCompanion extends UpdateCompanion<TestStep> {
     this.stepNumber = const Value.absent(),
     this.description = const Value.absent(),
     this.expected = const Value.absent(),
+    this.status = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TestStepsCompanion.insert({
@@ -2827,6 +2862,7 @@ class TestStepsCompanion extends UpdateCompanion<TestStep> {
     required int stepNumber,
     required String description,
     this.expected = const Value.absent(),
+    this.status = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        testCaseId = Value(testCaseId),
@@ -2838,6 +2874,7 @@ class TestStepsCompanion extends UpdateCompanion<TestStep> {
     Expression<int>? stepNumber,
     Expression<String>? description,
     Expression<String>? expected,
+    Expression<String>? status,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2846,6 +2883,7 @@ class TestStepsCompanion extends UpdateCompanion<TestStep> {
       if (stepNumber != null) 'step_number': stepNumber,
       if (description != null) 'description': description,
       if (expected != null) 'expected': expected,
+      if (status != null) 'status': status,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2856,6 +2894,7 @@ class TestStepsCompanion extends UpdateCompanion<TestStep> {
     Value<int>? stepNumber,
     Value<String>? description,
     Value<String?>? expected,
+    Value<String>? status,
     Value<int>? rowid,
   }) {
     return TestStepsCompanion(
@@ -2864,6 +2903,7 @@ class TestStepsCompanion extends UpdateCompanion<TestStep> {
       stepNumber: stepNumber ?? this.stepNumber,
       description: description ?? this.description,
       expected: expected ?? this.expected,
+      status: status ?? this.status,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2886,6 +2926,9 @@ class TestStepsCompanion extends UpdateCompanion<TestStep> {
     if (expected.present) {
       map['expected'] = Variable<String>(expected.value);
     }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2900,6 +2943,7 @@ class TestStepsCompanion extends UpdateCompanion<TestStep> {
           ..write('stepNumber: $stepNumber, ')
           ..write('description: $description, ')
           ..write('expected: $expected, ')
+          ..write('status: $status, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -6553,6 +6597,7 @@ typedef $$TestStepsTableCreateCompanionBuilder =
       required int stepNumber,
       required String description,
       Value<String?> expected,
+      Value<String> status,
       Value<int> rowid,
     });
 typedef $$TestStepsTableUpdateCompanionBuilder =
@@ -6562,6 +6607,7 @@ typedef $$TestStepsTableUpdateCompanionBuilder =
       Value<int> stepNumber,
       Value<String> description,
       Value<String?> expected,
+      Value<String> status,
       Value<int> rowid,
     });
 
@@ -6618,6 +6664,11 @@ class $$TestStepsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$TestCasesTableFilterComposer get testCaseId {
     final $$TestCasesTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -6671,6 +6722,11 @@ class $$TestStepsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$TestCasesTableOrderingComposer get testCaseId {
     final $$TestCasesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -6719,6 +6775,9 @@ class $$TestStepsTableAnnotationComposer
 
   GeneratedColumn<String> get expected =>
       $composableBuilder(column: $table.expected, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
 
   $$TestCasesTableAnnotationComposer get testCaseId {
     final $$TestCasesTableAnnotationComposer composer = $composerBuilder(
@@ -6777,6 +6836,7 @@ class $$TestStepsTableTableManager
                 Value<int> stepNumber = const Value.absent(),
                 Value<String> description = const Value.absent(),
                 Value<String?> expected = const Value.absent(),
+                Value<String> status = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TestStepsCompanion(
                 id: id,
@@ -6784,6 +6844,7 @@ class $$TestStepsTableTableManager
                 stepNumber: stepNumber,
                 description: description,
                 expected: expected,
+                status: status,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -6793,6 +6854,7 @@ class $$TestStepsTableTableManager
                 required int stepNumber,
                 required String description,
                 Value<String?> expected = const Value.absent(),
+                Value<String> status = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TestStepsCompanion.insert(
                 id: id,
@@ -6800,6 +6862,7 @@ class $$TestStepsTableTableManager
                 stepNumber: stepNumber,
                 description: description,
                 expected: expected,
+                status: status,
                 rowid: rowid,
               ),
           withReferenceMapper:
