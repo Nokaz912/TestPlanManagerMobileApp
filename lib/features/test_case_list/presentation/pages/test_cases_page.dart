@@ -301,6 +301,19 @@ class _TestCasePageState extends State<TestCasePage> {
 
   void _openStatusDialog(BuildContext context, TestStepEntity step) {
     String current = step.status;
+
+    final statuses = const [
+      'NotRun',
+      'Passed',
+      'Failed',
+      'Blocked',
+    ];
+
+    // jeśli status jest nieznany, ustaw domyślnie NotRun
+    if (!statuses.contains(current)) {
+      current = 'NotRun';
+    }
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -308,18 +321,27 @@ class _TestCasePageState extends State<TestCasePage> {
         content: DropdownButtonFormField<String>(
           value: current,
           decoration: const InputDecoration(labelText: 'Status'),
-          items: const [
-            DropdownMenuItem(value: 'NotRun', child: Text('Not Run')),
-            DropdownMenuItem(value: 'Passed', child: Text('Passed')),
-            DropdownMenuItem(value: 'Failed', child: Text('Failed')),
-            DropdownMenuItem(value: 'Blocked', child: Text('Blocked')),
-          ],
+          items: statuses.map((s) {
+            return DropdownMenuItem<String>(
+              value: s,
+              child: Text(
+                switch (s) {
+                  'Passed' => '✅ Passed',
+                  'Failed' => '❌ Failed',
+                  'Blocked' => '⛔ Blocked',
+                  'NotRun' => '⚪ Not Run',
+                  _ => s,
+                },
+              ),
+            );
+          }).toList(),
           onChanged: (v) => current = v ?? step.status,
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Anuluj')),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Anuluj'),
+          ),
           ElevatedButton(
             onPressed: () {
               final updated = step.copyWith(status: current);
@@ -332,4 +354,5 @@ class _TestCasePageState extends State<TestCasePage> {
       ),
     );
   }
+
 }

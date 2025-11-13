@@ -21,14 +21,37 @@ class TestCaseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = _statusColor(testCase.status);
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       elevation: 2,
       child: ListTile(
-        leading: const Icon(Icons.bug_report),
-        title: Text(testCase.title),
-        subtitle: Text('Status: ${testCase.status}'),
+        leading: Icon(Icons.bug_report, color: color),
+        title: Text(
+          testCase.title,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Row(
+          children: [
+            const Text('Status: '),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                testCase.status,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
         trailing: PopupMenuButton<String>(
           onSelected: (v) {
             if (v == 'edit') _openEditDialog(context);
@@ -50,12 +73,17 @@ class TestCaseTile extends StatelessWidget {
     );
   }
 
-  // 🔹 Edycja test case’a
   void _openEditDialog(BuildContext context) {
     final titleCtrl = TextEditingController(text: testCase.title);
     final expectedCtrl =
     TextEditingController(text: testCase.expectedResult ?? '');
-    String status = testCase.status;
+    String current = testCase.status;
+
+    final statuses = const ['Pending', 'NotRun', 'Passed', 'Failed', 'Blocked'];
+
+    if (!statuses.contains(current)) {
+      current = 'Pending';
+    }
 
     showDialog(
       context: context,
@@ -64,39 +92,56 @@ class TestCaseTile extends StatelessWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Tytuł')),
-            TextField(controller: expectedCtrl, decoration: const InputDecoration(labelText: 'Oczekiwany rezultat')),
+            TextField(
+              controller: titleCtrl,
+              decoration: const InputDecoration(labelText: 'Tytuł'),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: expectedCtrl,
+              decoration:
+              const InputDecoration(labelText: 'Oczekiwany rezultat'),
+            ),
+            const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              value: status,
+              value: current,
               decoration: const InputDecoration(labelText: 'Status'),
-              items: const [
-                DropdownMenuItem(value: 'Pending', child: Text('Pending')),
-                DropdownMenuItem(value: 'Passed', child: Text('Passed')),
-                DropdownMenuItem(value: 'Failed', child: Text('Failed')),
-                DropdownMenuItem(value: 'Blocked', child: Text('Blocked')),
-              ],
-              onChanged: (v) => status = v ?? testCase.status,
+              items: statuses.map((s) {
+                return DropdownMenuItem<String>(
+                  value: s,
+                  child: Text(
+                    switch (s) {
+                      'Passed' => '✅ Passed',
+                      'Failed' => '❌ Failed',
+                      'Blocked' => '⛔ Blocked',
+                      'NotRun' => '⚪ Not Run',
+                      'Pending' => '🕓 Pending',
+                      _ => s,
+                    },
+                  ),
+                );
+              }).toList(),
+              onChanged: (v) => current = v ?? testCase.status,
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Anuluj')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Anuluj'),
+          ),
           ElevatedButton(
             onPressed: () {
               final title = titleCtrl.text.trim();
               if (title.isEmpty) return;
 
-              final updated = TestCaseEntity(
-                id: testCase.id,
-                planId: testCase.planId,
+              final updated = testCase.copyWith(
                 title: title,
-                status: status,
                 expectedResult: expectedCtrl.text.trim().isEmpty
                     ? null
                     : expectedCtrl.text.trim(),
-                assignedToUserId: testCase.assignedToUserId,
+                status: current,
                 lastModifiedUtc: DateTime.now().toUtc(),
-                parentCaseId: testCase.parentCaseId,
               );
 
               context.read<TestPlanBloc>().add(UpdateTestCaseEvent(updated));
@@ -109,7 +154,6 @@ class TestCaseTile extends StatelessWidget {
     );
   }
 
-  // 🔹 Usuwanie test case’a
   void _confirmDelete(BuildContext context) {
     showDialog(
       context: context,
@@ -117,7 +161,10 @@ class TestCaseTile extends StatelessWidget {
         title: const Text('Usuń Test Case'),
         content: Text('Czy na pewno chcesz usunąć „${testCase.title}”?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Anuluj')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Anuluj'),
+          ),
           ElevatedButton(
             onPressed: () {
               context.read<TestPlanBloc>().add(DeleteTestCaseEvent(testCase.id));
@@ -128,5 +175,20 @@ class TestCaseTile extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Color _statusColor(String status) {
+    switch (status) {
+      case 'Passed':
+        return Colors.green;
+      case 'Failed':
+        return Colors.red;
+      case 'Blocked':
+        return Colors.orange;
+      case 'NotRun':
+        return Colors.grey;
+      default:
+        return Colors.blueGrey;
+    }
   }
 }

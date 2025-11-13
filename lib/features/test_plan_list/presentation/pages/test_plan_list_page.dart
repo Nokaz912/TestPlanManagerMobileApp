@@ -34,7 +34,6 @@ class TestPlanListPage extends StatelessWidget {
           ),
         ),
 
-        // ✅ FAB z poprawionym kontekstem
         floatingActionButton: Builder(
           builder: (innerContext) => FloatingActionButton.extended(
             onPressed: () => _openCreateCaseDialog(innerContext),
@@ -62,24 +61,99 @@ class TestPlanListPage extends StatelessWidget {
             if (testCases.isEmpty) {
               return const Center(child: Text('Brak przypadków testowych'));
             }
+            
+            final total = testCases.length;
+            final passed = testCases.where((c) => c.status == 'Passed').length;
+            final failed = testCases.where((c) => c.status == 'Failed').length;
+            final blocked = testCases.where((c) => c.status == 'Blocked').length;
+            final notRun = testCases
+                .where((c) => c.status == 'NotRun' || c.status == 'Pending')
+                .length;
+            final progress = total > 0 ? passed / total : 0.0;
 
             return RefreshIndicator(
               onRefresh: () async {
-                context
-                    .read<TestPlanBloc>()
-                    .add(GetTestCasesForPlanEvent(planId));
+                context.read<TestPlanBloc>().add(GetTestCasesForPlanEvent(planId));
               },
-              child: ListView.builder(
-                itemCount: testCases.length,
-                itemBuilder: (context, index) {
-                  final testCase = testCases[index];
-                  return TestCaseTile(
-                    testCase: testCase,
-                    projectId: projectId,
-                    moduleId: moduleId,
-                    planId: planId,
-                  );
-                },
+              child: Column(
+                children: [
+                  Padding(
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: Card(
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Postęp testów',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            LinearProgressIndicator(
+                              value: progress,
+                              minHeight: 8,
+                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.green,
+                              backgroundColor: Colors.grey.shade300,
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('✅ Passed: $passed',
+                                    style: const TextStyle(
+                                        color: Colors.green, fontSize: 13)),
+                                Text('❌ Failed: $failed',
+                                    style: const TextStyle(
+                                        color: Colors.red, fontSize: 13)),
+                                Text('⛔ Blocked: $blocked',
+                                    style: const TextStyle(
+                                        color: Colors.orange, fontSize: 13)),
+                                Text('⚪ NotRun: $notRun',
+                                    style: const TextStyle(
+                                        color: Colors.grey, fontSize: 13)),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Razem: $passed / $total ukończonych',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const Divider(height: 0),
+
+                  // ✅ Lista test case’ów
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: testCases.length,
+                      itemBuilder: (context, index) {
+                        final testCase = testCases[index];
+                        return TestCaseTile(
+                          testCase: testCase,
+                          projectId: projectId,
+                          moduleId: moduleId,
+                          planId: planId,
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             );
           },
@@ -88,7 +162,6 @@ class TestPlanListPage extends StatelessWidget {
     );
   }
 
-  /// 🧩 Dialog dodawania nowego test case’a
   void _openCreateCaseDialog(BuildContext context) {
     final titleCtrl = TextEditingController();
     final expectedCtrl = TextEditingController();
