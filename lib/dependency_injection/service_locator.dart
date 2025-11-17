@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 
 // 🌍 GLOBAL
@@ -10,6 +11,7 @@ import '../core/global/navigation/domain/usecases/get_visited_modules.dart';
 import '../core/global/navigation/domain/usecases/save_visited_modules.dart';
 
 // 🧩 DATABASE
+import '../core/global/pkce_service/pkce_service.dart';
 import '../core/usecases/impl/recalculate_testcase_progress.dart';
 import '../database/data.dart';
 import '../database/daos/comments_dao.dart';
@@ -20,6 +22,11 @@ import '../database/daos/test_plans_dao.dart';
 import '../database/daos/test_steps_dao.dart';
 
 // PROJECTS
+import '../database/graph/remote_datasource.dart';
+import '../features/auth/data/repositories/auth_repository_impl.dart';
+import '../features/auth/domain/repositories/auth_repository.dart';
+import '../features/auth/domain/usecases/login_usecase.dart';
+import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/project_list/data/repository/project_repository_impl.dart';
 import '../features/project_list/domain/repository/project_repository.dart';
 import '../features/project_list/domain/usecases/create_new_project.dart';
@@ -235,5 +242,45 @@ Future<void> init() async {
           exportToFile: sl<ExportToFile>(),
     ),
   );
+  //MICROSOFT LISTS
+
+  sl.registerLazySingleton<PkceService>(() => PkceService());
+  sl.registerLazySingleton<FlutterSecureStorage>(() => const FlutterSecureStorage());
+
+// ----------------------
+// Data Sources
+// ----------------------
+  sl.registerLazySingleton<AuthRemoteDataSource>(
+        () => AuthRemoteDataSource(),
+  );
+
+// ----------------------
+// Repository
+// ----------------------
+  sl.registerLazySingleton<AuthRepository>(
+        () => AuthRepositoryImpl(
+      remoteDataSource: sl<AuthRemoteDataSource>(),
+      pkceService: sl<PkceService>(),
+      secureStorage: sl<FlutterSecureStorage>(),
+    ),
+  );
+
+// ----------------------
+// UseCases
+// ----------------------
+  sl.registerLazySingleton<LoginUseCase>(
+        () => LoginUseCase(sl<AuthRepository>()),
+  );
+
+// ----------------------
+// Bloc
+// ----------------------
+  sl.registerFactory<AuthBloc>(
+        () => AuthBloc(
+      secureStorage: sl<FlutterSecureStorage>(),
+      loginUseCase: sl<LoginUseCase>(),
+    ),
+  );
+
 
 }

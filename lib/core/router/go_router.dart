@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:test_plan_manager_app/features/auth/presentation/pages/microsoft_login_page.dart';
 
 import '../../dependency_injection/service_locator.dart';
 
 // PROJECTS
+import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/start_page.dart';
 import '../../features/project_list/presentation/bloc/project_bloc.dart';
 import '../../features/project_list/presentation/bloc/project_event.dart';
 import '../../features/project_list/presentation/pages/project_list_page.dart';
@@ -35,8 +39,24 @@ import '../../features/test_execution/presentation/bloc/test_execution_event.dar
 import '../../features/test_execution/presentation/pages/execution_page.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/projects',
+  initialLocation: '/start',
   routes: [
+    GoRoute(
+      path: '/start',
+      builder: (context, state) => BlocProvider(
+        create: (_) => sl<AuthBloc>(),
+        child: const StartPage(),
+      ),
+    ),
+
+    // LOGIN PAGE
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => BlocProvider.value(
+        value: sl<AuthBloc>(),
+        child: const LoginPage(),
+      ),
+    ),
 
     //------------------------------------------------------------
     // PROJECT LIST
