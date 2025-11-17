@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+
 import '../bloc/project_bloc.dart';
 import '../bloc/project_event.dart';
 import '../bloc/project_state.dart';
@@ -57,18 +59,35 @@ class _ProjectListPageState extends State<ProjectListPage> {
 
           final projects = state.projects;
 
-          if (projects.isEmpty) {
-            return const Center(child: Text('No projects found'));
-          }
+          return Column(
+            children: [
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async => _dispatchLoadProjects(),
+                  child: projects.isEmpty
+                      ? const Center(child: Text('No projects found'))
+                      : ListView.builder(
+                    itemCount: projects.length,
+                    itemBuilder: (context, index) {
+                      return ProjectTile(project: projects[index]);
+                    },
+                  ),
+                ),
+              ),
 
-          return RefreshIndicator(
-            onRefresh: () async => _dispatchLoadProjects(),
-            child: ListView.builder(
-              itemCount: projects.length,
-              itemBuilder: (context, index) {
-                return ProjectTile(project: projects[index]);
-              },
-            ),
+              SafeArea(
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      context.go('/execution');
+                    },
+                    child: const Text('Start Test Execution'),
+                  ),
+                ),
+              ),
+            ],
           );
         },
       ),

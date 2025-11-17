@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:get_it/get_it.dart';
 
 // 🌍 GLOBAL
+import '../core/global/file_service/file_service.dart';
 import '../core/global/navigation/data/repository/navigation_repository_impl.dart';
 import '../core/global/navigation/domain/repository/navigation_repository.dart';
 import '../core/global/navigation/domain/usecases/get_visited_modules.dart';
@@ -40,6 +43,13 @@ import '../features/module_list/domain/usecases/delete_test_plan.dart';
 import '../features/module_list/presentation/bloc/module_bloc.dart';
 
 // TEST PLANS
+import '../features/test_execution/data/repositories/test_execution_repository_impl.dart';
+import '../features/test_execution/domain/repositories/test_execution_repository.dart';
+import '../features/test_execution/domain/usecases/export_to_file.dart';
+import '../features/test_execution/domain/usecases/get_all_projects.dart';
+import '../features/test_execution/domain/usecases/get_project_structure.dart';
+import '../features/test_execution/domain/usecases/update_step_temp_status.dart';
+import '../features/test_execution/presentation/bloc/test_execution_bloc.dart';
 import '../features/test_plan_list/data/repositories/test_plan_repository_impl.dart';
 import '../features/test_plan_list/domain/repositories/test_plan_repository.dart';
 import '../features/test_plan_list/domain/usecases/get_test_cases_for_plan.dart';
@@ -184,4 +194,46 @@ Future<void> init() async {
   sl.registerLazySingleton<NavigationRepository>(() => NavigationRepositoryImpl());
   sl.registerLazySingleton(() => SaveVisitedModules(sl()));
   sl.registerLazySingleton(() => GetVisitedModules(sl()));
+
+
+  sl.registerLazySingleton<Directory>(() => Directory.current);
+
+  sl.registerLazySingleton<FileService>(() => FileService());
+
+  // TESTEXECUTION
+
+  sl.registerLazySingleton<TestExecutionRepository>(
+        () => TestExecutionRepositoryImpl(
+      projectDao: sl<ProjectDao>(),
+      moduleDao: sl<ModuleDao>(),
+      testPlansDao: sl<TestPlansDao>(),
+      testCasesDao: sl<TestCasesDao>(),
+      testStepsDao: sl<TestStepsDao>(),
+          fileService: sl(),
+    ),
+  );
+
+  sl.registerLazySingleton<GetAllProjectsForTestsUseCase>(
+        () => GetAllProjectsForTestsUseCase(sl<TestExecutionRepository>()),
+  );
+
+  sl.registerLazySingleton(
+        () => GetProjectStructure(sl<TestExecutionRepository>()),
+  );
+
+  sl.registerLazySingleton(
+        () => UpdateStepTempStatus(sl<TestExecutionRepository>()),
+  );
+  sl.registerLazySingleton(
+          () => ExportToFile(sl()));
+
+  sl.registerFactory(
+        () => TestExecutionBloc(
+      getAllProjectsUseCase: sl<GetAllProjectsForTestsUseCase>(),
+      getProjectStructure: sl<GetProjectStructure>(),
+      updateStepTempStatus: sl<UpdateStepTempStatus>(),
+          exportToFile: sl<ExportToFile>(),
+    ),
+  );
+
 }
