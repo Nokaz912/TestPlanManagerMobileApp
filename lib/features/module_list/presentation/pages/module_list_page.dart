@@ -11,7 +11,7 @@ import '../widgets/test_plan_tile.dart';
 import '../../domain/entities/module.dart';
 import '../../domain/entities/test_plan.dart';
 
-class ModuleListPage extends StatelessWidget {
+class ModuleListPage extends StatefulWidget {
   final String projectId;
   final String? moduleId;
   final String projectName;
@@ -24,10 +24,17 @@ class ModuleListPage extends StatelessWidget {
   });
 
   @override
+  State<ModuleListPage> createState() => _ModuleListPageState();
+}
+
+class _ModuleListPageState extends State<ModuleListPage> {
+  String searchQuery = "";
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(projectName),
+        title: Text(widget.projectName),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           tooltip: 'Back',
@@ -36,54 +43,84 @@ class ModuleListPage extends StatelessWidget {
             final current = List<String>.from(bloc.state.visitedModules);
 
             if (current.isEmpty) {
-              bloc.add(SetVisitedPathEvent(projectId, const []));
+              bloc.add(SetVisitedPathEvent(widget.projectId, const []));
               context.go('/projects');
               return;
             }
 
             if (current.length == 1) {
-              bloc.add(SetVisitedPathEvent(projectId, const []));
+              bloc.add(SetVisitedPathEvent(widget.projectId, const []));
               context.go('/projects');
               return;
             }
 
             current.removeLast();
-            bloc.add(SetVisitedPathEvent(projectId, current));
+            bloc.add(SetVisitedPathEvent(widget.projectId, current));
 
             final parentId = current.last;
-            context.go('/modules/$projectId/sub/$parentId', extra: projectName);
+            context.go('/modules/${widget.projectId}/sub/$parentId',
+                extra: widget.projectName);
           },
         ),
       ),
       body: BlocBuilder<ModuleBloc, ModuleState>(
         builder: (context, state) {
-          final modules = moduleId == null
+          final modules = widget.moduleId == null
               ? state.modules
-              : (state.submodules[moduleId] ?? []);
-          final testPlans =
-          moduleId != null ? (state.testPlans[moduleId] ?? []) : const <TestPlanEntity>[];
+              : (state.submodules[widget.moduleId] ?? []);
+
+          final testPlans = widget.moduleId != null
+              ? (state.testPlans[widget.moduleId] ?? [])
+              : const <TestPlanEntity>[];
 
           if (state.status == ModuleStatus.loading) {
             return const Center(child: CircularProgressIndicator());
           }
 
+          final filteredModules = modules
+              .where((m) => m.name.toLowerCase().contains(searchQuery.toLowerCase()))
+              .toList();
+
+          final filteredPlans = testPlans
+              .where((p) => p.name.toLowerCase().contains(searchQuery.toLowerCase()))
+              .toList();
+
+          final combinedEmpty =
+              filteredModules.isEmpty && filteredPlans.isEmpty;
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              buildPathBar(context, state, projectId),
+              buildPathBar(context, state, widget.projectId),
+
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Szukaj modułu lub planu testów',
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (value) {
+                    setState(() => searchQuery = value);
+                  },
+                ),
+              ),
+
               const Divider(height: 1),
+
               Expanded(
-                child: (modules.isEmpty && testPlans.isEmpty)
-                    ? const Center(child: Text('No data found'))
+                child: combinedEmpty
+                    ? const Center(child: Text('Brak wyników'))
                     : ListView(
                   children: [
-                    ...modules.map((m) => ModuleTile(module: m)),
-                    ...testPlans.map(
+                    ...filteredModules.map((m) => ModuleTile(module: m)),
+                    ...filteredPlans.map(
                           (p) => TestPlanTile(
                         plan: p,
-                        projectId: projectId,
-                        moduleId: moduleId ?? '',
-                        projectName: projectName,
+                        projectId: widget.projectId,
+                        moduleId: widget.moduleId ?? '',
+                        projectName: widget.projectName,
                       ),
                     ),
                   ],
@@ -94,28 +131,26 @@ class ModuleListPage extends StatelessWidget {
         },
       ),
 
-      // FAB z menu: dodaj moduł (zawsze), dodaj plan testów (tylko wewnątrz modułu)
       floatingActionButton: PopupMenuButton<String>(
         offset: const Offset(0, -56),
         icon: const Icon(Icons.add),
         onSelected: (value) {
           if (value == 'add_module') {
             _openCreateModuleDialog(context,
-                projectId: projectId, parentModuleId: moduleId);
-          } else if (value == 'add_plan' && moduleId != null) {
-            _openCreateTestPlanDialog(context, moduleId: moduleId!);
+                projectId: widget.projectId, parentModuleId: widget.moduleId);
+          } else if (value == 'add_plan' && widget.moduleId != null) {
+            _openCreateTestPlanDialog(context, moduleId: widget.moduleId!);
           }
         },
         itemBuilder: (context) => [
           const PopupMenuItem(value: 'add_module', child: Text('Dodaj moduł')),
-          if (moduleId != null)
+          if (widget.moduleId != null)
             const PopupMenuItem(value: 'add_plan', child: Text('Dodaj plan testów')),
         ],
       ),
     );
   }
 
-  // ————— Dialog: utworzenie modułu —————
   void _openCreateModuleDialog(BuildContext context,
       {required String projectId, String? parentModuleId}) {
     final nameCtrl = TextEditingController();
@@ -163,7 +198,6 @@ class ModuleListPage extends StatelessWidget {
     );
   }
 
-  // ————— Dialog: utworzenie planu testów —————
   void _openCreateTestPlanDialog(BuildContext context, {required String moduleId}) {
     final nameCtrl = TextEditingController();
     final descCtrl = TextEditingController();

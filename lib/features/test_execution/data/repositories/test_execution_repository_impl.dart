@@ -151,7 +151,7 @@ class TestExecutionRepositoryImpl implements TestExecutionRepository {
       }
 
       final filePath =
-      await fileService.saveExecutionStatusToTxt(_tempStatusBuffer);
+      await fileService.saveExecutionStatusToJson(_tempStatusBuffer);
 
       return Right(filePath);
 

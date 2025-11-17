@@ -1,0 +1,14 @@
+{
+  "client_id" : "2a82f3fd-d4e5-44c7-a0fb-d2a95c9b9e00",
+  "authorization_user_agent" : "DEFAULT",
+  "redirect_uri" : "msauth://workai.pl.test_plan_manager_app/sFvfVHx91Oto6P3W425COiNd8v4%3D",
+  "authorities" : [
+    {
+      "type": "AAD",
+      "audience": {
+        "type": "AzureADandPersonalMicrosoftAccount",
+        "tenant_id": "common"
+      }
+    }
+  ]
+}

@@ -7,7 +7,9 @@ import '../../../test_plan_list/presentation/bloc/test_plan_state.dart';
 import '../widgets/test_case_tile.dart';
 import '../../domain/entities/test_case.dart';
 
-class TestPlanListPage extends StatelessWidget {
+enum TestCaseSortMode { none, newest, oldest }
+
+class TestPlanListPage extends StatefulWidget {
   final String planId;
   final String moduleId;
   final String projectId;
@@ -20,20 +22,26 @@ class TestPlanListPage extends StatelessWidget {
   });
 
   @override
+  State<TestPlanListPage> createState() => _TestPlanListPageState();
+}
+
+class _TestPlanListPageState extends State<TestPlanListPage> {
+  String searchQuery = "";
+  TestCaseSortMode sortMode = TestCaseSortMode.none;
+
+  @override
   Widget build(BuildContext context) {
     return BlocProvider<TestPlanBloc>(
-      create: (context) =>
-      di.sl<TestPlanBloc>()..add(GetTestCasesForPlanEvent(planId)),
+      create: (_) =>
+      di.sl<TestPlanBloc>()..add(GetTestCasesForPlanEvent(widget.planId)),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Test Cases'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            tooltip: 'Back',
             onPressed: () => Navigator.pop(context),
           ),
         ),
-
         floatingActionButton: Builder(
           builder: (innerContext) => FloatingActionButton.extended(
             onPressed: () => _openCreateCaseDialog(innerContext),
@@ -41,7 +49,6 @@ class TestPlanListPage extends StatelessWidget {
             label: const Text('Nowy test case'),
           ),
         ),
-
         body: BlocBuilder<TestPlanBloc, TestPlanState>(
           builder: (context, state) {
             if (state.status == TestPlanStatus.loading ||
@@ -51,35 +58,102 @@ class TestPlanListPage extends StatelessWidget {
 
             if (state.status == TestPlanStatus.failure) {
               return Center(
-                child: Text(
-                  state.errorMessage ?? 'Błąd ładowania test case\'ów',
-                ),
+                child: Text(state.errorMessage ?? 'Błąd ładowania test case\'ów'),
               );
             }
 
-            final testCases = state.testCases;
-            if (testCases.isEmpty) {
-              return const Center(child: Text('Brak przypadków testowych'));
+            final allCases = state.testCases;
+
+            List<TestCaseEntity> filtered = allCases
+                .where((c) =>
+                c.title.toLowerCase().contains(searchQuery.toLowerCase()))
+                .toList();
+
+            if (sortMode == TestCaseSortMode.newest) {
+              filtered.sort((a, b) =>
+                  (b.lastModifiedUtc ?? DateTime(0))
+                      .compareTo(a.lastModifiedUtc ?? DateTime(0)));
+            } else if (sortMode == TestCaseSortMode.oldest) {
+              filtered.sort((a, b) =>
+                  (a.lastModifiedUtc ?? DateTime(0))
+                      .compareTo(b.lastModifiedUtc ?? DateTime(0)));
             }
 
-            final total = testCases.length;
-            final passed = testCases.where((c) => c.status == 'Passed').length;
-            final failed = testCases.where((c) => c.status == 'Failed').length;
-            final blocked = testCases.where((c) => c.status == 'Blocked').length;
-            final notRun = testCases
+            final total = allCases.length;
+            final passed = allCases.where((c) => c.status == 'Passed').length;
+            final failed = allCases.where((c) => c.status == 'Failed').length;
+            final blocked = allCases.where((c) => c.status == 'Blocked').length;
+            final notRun = allCases
                 .where((c) => c.status == 'NotRun' || c.status == 'Pending')
                 .length;
             final progress = total > 0 ? passed / total : 0.0;
 
             return RefreshIndicator(
-              onRefresh: () async {
-                context.read<TestPlanBloc>().add(GetTestCasesForPlanEvent(planId));
-              },
+              onRefresh: () async => context
+                  .read<TestPlanBloc>()
+                  .add(GetTestCasesForPlanEvent(widget.planId)),
               child: Column(
                 children: [
                   Padding(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+                    child: Row(
+                      children: [
+                        // 🔍 SEARCH FIELD (flex = 3)
+                        Expanded(
+                          flex: 3,
+                          child: TextField(
+                            decoration: const InputDecoration(
+                              labelText: "Szukaj",
+                              prefixIcon: Icon(Icons.search),
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                            ),
+                            onChanged: (value) {
+                              setState(() => searchQuery = value);
+                            },
+                          ),
+                        ),
+
+                        const SizedBox(width: 12),
+
+                        // 🔽 SORT DROPDOWN (flex = 2)
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade400),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: DropdownButton<TestCaseSortMode>(
+                              value: sortMode,
+                              underline: const SizedBox(),
+                              isExpanded: true,
+                              items: const [
+                                DropdownMenuItem(
+                                  value: TestCaseSortMode.none,
+                                  child: Text("Brak"),
+                                ),
+                                DropdownMenuItem(
+                                  value: TestCaseSortMode.newest,
+                                  child: Text("Najnowsze"),
+                                ),
+                                DropdownMenuItem(
+                                  value: TestCaseSortMode.oldest,
+                                  child: Text("Najstarsze"),
+                                ),
+                              ],
+                              onChanged: (value) {
+                                setState(() => sortMode = value!);
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                     child: Card(
                       elevation: 2,
                       shape: RoundedRectangleBorder(
@@ -129,26 +203,25 @@ class TestPlanListPage extends StatelessWidget {
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
                               ),
-                            ),
+                            )
                           ],
                         ),
                       ),
                     ),
                   ),
 
-                  const Divider(height: 0),
-
-                  // ✅ Lista test case’ów
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: testCases.length,
+                    child: filtered.isEmpty
+                        ? const Center(child: Text("Brak wyników"))
+                        : ListView.builder(
+                      itemCount: filtered.length,
                       itemBuilder: (context, index) {
-                        final testCase = testCases[index];
+                        final testCase = filtered[index];
                         return TestCaseTile(
                           testCase: testCase,
-                          projectId: projectId,
-                          moduleId: moduleId,
-                          planId: planId,
+                          projectId: widget.projectId,
+                          moduleId: widget.moduleId,
+                          planId: widget.planId,
                         );
                       },
                     ),
@@ -196,12 +269,11 @@ class TestPlanListPage extends StatelessWidget {
 
               final newCase = TestCaseEntity(
                 id: DateTime.now().millisecondsSinceEpoch.toString(),
-                planId: planId,
+                planId: widget.planId,
                 title: title,
                 status: 'Pending',
-                expectedResult: expectedCtrl.text.trim().isNotEmpty
-                    ? expectedCtrl.text.trim()
-                    : null,
+                expectedResult:
+                expectedCtrl.text.trim().isNotEmpty ? expectedCtrl.text : null,
                 assignedToUserId: null,
                 lastModifiedUtc: DateTime.now().toUtc(),
                 parentCaseId: null,
