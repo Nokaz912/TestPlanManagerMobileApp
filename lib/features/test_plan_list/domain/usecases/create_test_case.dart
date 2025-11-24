@@ -2,10 +2,10 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../entities/test_case.dart';
-import '../repositories/test_plan_repository.dart';
+import '../repositories/test_case_repository.dart';
 
 class CreateTestCase implements UseCase<void, CreateTestCaseParams> {
-  final TestPlanRepository repository;
+  final TestCaseRepository repository;
   CreateTestCase(this.repository);
 
   @override

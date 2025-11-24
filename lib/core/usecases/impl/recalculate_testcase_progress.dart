@@ -1,12 +1,12 @@
 import 'package:dartz/dartz.dart';
 
-import '../../../features/test_step_list/domain/repository/test_case_repository.dart';
-import '../../../features/test_plan_list/domain/repositories/test_plan_repository.dart';
+import '../../../features/test_step_list/domain/repository/test_step_repository.dart';
+import '../../../features/test_plan_list/domain/repositories/test_case_repository.dart';
 import '../../error/failures.dart';
 
 class RecalculateTestCaseProgress {
-  final TestCaseRepository stepRepo;
-  final TestPlanRepository caseRepo;
+  final TestStepRepository stepRepo;      // do pobrania kroków
+  final TestCaseRepository caseRepo;      // do update test case
 
   RecalculateTestCaseProgress({
     required this.stepRepo,
@@ -20,7 +20,13 @@ class RecalculateTestCaseProgress {
           (failure) => Left(failure),
           (steps) async {
         if (steps.isEmpty) {
-          return const Right(null);
+          // brak kroków — ustaw NotRun
+          return await caseRepo.updateStepsAndStatus(
+            testCaseId,
+            0,
+            0,
+            'NotRun',
+          );
         }
 
         final total = steps.length;

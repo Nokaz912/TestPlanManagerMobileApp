@@ -7,11 +7,10 @@ class TestCaseEntity {
   final String? assignedToUserId;
   final DateTime? lastModifiedUtc;
   final String? parentCaseId;
-
   final int totalSteps;
   final int passedSteps;
 
-  TestCaseEntity({
+  const TestCaseEntity({
     required this.id,
     required this.planId,
     required this.title,
@@ -24,7 +23,6 @@ class TestCaseEntity {
     this.passedSteps = 0,
   });
 
-  // 🔥 TU DODAJEMY copyWith
   TestCaseEntity copyWith({
     String? id,
     String? planId,

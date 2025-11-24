@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
-import '../repositories/test_plan_repository.dart';
+import '../repositories/test_case_repository.dart';
 
 class DeleteTestCase implements UseCase<void, DeleteTestCaseParams> {
-  final TestPlanRepository repository;
+  final TestCaseRepository repository;
   DeleteTestCase(this.repository);
 
   @override

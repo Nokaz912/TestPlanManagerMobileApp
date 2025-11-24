@@ -4,9 +4,9 @@ import '../../../../core/error/failures.dart';
 import '../../../../database/daos/test_steps_dao.dart';
 import '../../../../database/drift_database/data.dart';
 import '../../domain/entities/test_step.dart';
-import '../../domain/repository/test_case_repository.dart';
+import '../../domain/repository/test_step_repository.dart';
 
-class TestStepRepositoryImpl implements TestCaseRepository {
+class TestStepRepositoryImpl implements TestStepRepository {
   final TestStepsDao dao;
 
   TestStepRepositoryImpl(this.dao);

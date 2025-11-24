@@ -3,7 +3,7 @@ import 'package:test_plan_manager_app/core/error/failures.dart';
 import 'package:test_plan_manager_app/core/usecases/usecase.dart';
 import 'package:test_plan_manager_app/features/module_list/domain/repository/module_repository.dart';
 import '../entities/test_plan.dart';
-import '../../../test_plan_list/domain/repositories/test_plan_repository.dart';
+import '../../../test_plan_list/domain/repositories/test_case_repository.dart';
 
 class ModuleIdParams {
   final String moduleId;

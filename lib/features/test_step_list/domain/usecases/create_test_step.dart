@@ -2,10 +2,10 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../entities/test_step.dart';
-import '../repository/test_case_repository.dart';
+import '../repository/test_step_repository.dart';
 
 class CreateTestStep implements UseCase<void, TestStepEntity> {
-  final TestCaseRepository repository;
+  final TestStepRepository repository;
 
   CreateTestStep(this.repository);
 

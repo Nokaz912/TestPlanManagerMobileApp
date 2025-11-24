@@ -21,6 +21,9 @@ class TestCasesDao extends DatabaseAccessor<AppDatabase> with _$TestCasesDaoMixi
   Future<void> updateTestCase(TestCasesCompanion data) =>
       into(db.testCases).insertOnConflictUpdate(data);
 
+  Future<void> upsertTestCase(TestCasesCompanion data) =>
+      into(db.testCases).insertOnConflictUpdate(data);
+
   Future<void> deleteTestCase(String id) =>
       (delete(db.testCases)..where((tbl) => tbl.id.equals(id))).go();
 

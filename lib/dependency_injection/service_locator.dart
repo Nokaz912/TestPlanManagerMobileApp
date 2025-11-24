@@ -24,6 +24,10 @@ import '../database/datasources/projects/local/projects_local_datasource.dart';
 import '../database/datasources/projects/local/projects_local_datasource_impl.dart';
 import '../database/datasources/projects/remote/projects_remote_datasource_impl.dart';
 import '../database/datasources/projects/remote/projects_remote_datasource.dart';
+import '../database/datasources/testcase/local/testcase_local_datasource.dart';
+import '../database/datasources/testcase/local/testcase_local_datasource_impl.dart';
+import '../database/datasources/testcase/remote/testcase_remote_datasource.dart';
+import '../database/datasources/testcase/remote/testcase_remote_datasource_impl.dart';
 import '../database/drift_database/data.dart';
 import '../database/daos/comments_dao.dart';
 import '../database/daos/module_dao.dart';
@@ -67,18 +71,17 @@ import '../features/test_execution/domain/usecases/get_all_projects.dart';
 import '../features/test_execution/domain/usecases/get_project_structure.dart';
 import '../features/test_execution/domain/usecases/update_step_temp_status.dart';
 import '../features/test_execution/presentation/bloc/test_execution_bloc.dart';
-import '../features/test_plan_list/data/repositories/test_plan_repository_impl.dart';
-import '../features/test_plan_list/domain/repositories/test_plan_repository.dart';
+import '../features/test_plan_list/data/repositories/test_case_repository_impl.dart';
+import '../features/test_plan_list/domain/repositories/test_case_repository.dart';
 import '../features/test_plan_list/domain/usecases/get_test_cases_for_plan.dart';
-import '../features/test_plan_list/domain/usecases/get_test_case_by_id.dart';
 import '../features/test_plan_list/domain/usecases/create_test_case.dart';
 import '../features/test_plan_list/domain/usecases/update_test_case.dart';
 import '../features/test_plan_list/domain/usecases/delete_test_case.dart';
 import '../features/test_plan_list/presentation/bloc/test_plan_bloc.dart';
 
 // TEST CASES / STEPS
-import '../features/test_step_list/data/repository/test_case_repository_impl.dart';
-import '../features/test_step_list/domain/repository/test_case_repository.dart';
+import '../features/test_step_list/data/repository/test_step_repository_impl.dart';
+import '../features/test_step_list/domain/repository/test_step_repository.dart';
 import '../features/test_step_list/domain/usecases/get_teststeps_for_case.dart';
 import '../features/test_step_list/domain/usecases/create_test_step.dart';
 import '../features/test_step_list/domain/usecases/update_test_step.dart';
@@ -97,8 +100,9 @@ import '../features/comments/presentation/bloc/comment_bloc.dart';
 final sl = GetIt.instance;
 
 Future<void> init() async {
+
   // ------------------------
-  // DATABASE
+  // DB
   // ------------------------
   final db = AppDatabase();
   sl.registerSingleton<AppDatabase>(db);
@@ -113,53 +117,39 @@ Future<void> init() async {
   // ------------------------
   // PROJECTS
   // ------------------------
+  sl.registerLazySingleton<ProjectLocalDataSource>(
+          () => ProjectLocalDataSourceImpl(sl<ProjectDao>()));
+  sl.registerLazySingleton<ProjectsRemoteDataSource>(
+          () => ProjectsRemoteDataSourceImpl(
+        httpClient: sl<Dio>(),
+        tokenProvider: () async => sl<AuthRepository>().getValidAccessToken(),
+      ));
+
   sl.registerLazySingleton<ProjectRepository>(
-        () => ProjectRepositoryImpl(
-      local: sl<ProjectLocalDataSource>(),
-      remote: sl<ProjectsRemoteDataSource>(),
-    ),
-  );
+          () => ProjectRepositoryImpl(local: sl(), remote: sl()));
+
   sl.registerLazySingleton(() => GetAllProjects(sl()));
   sl.registerLazySingleton(() => CreateProject(sl()));
   sl.registerLazySingleton(() => UpdateProject(sl()));
   sl.registerLazySingleton(() => DeleteProject(sl()));
+
   sl.registerFactory(() => ProjectBloc(sl(), sl(), sl(), sl()));
 
-  sl.registerLazySingleton<ProjectLocalDataSource>(
-        () => ProjectLocalDataSourceImpl(sl<ProjectDao>()),
-  );
-  sl.registerLazySingleton<ProjectsRemoteDataSource>(
-        () => ProjectsRemoteDataSourceImpl(
-      httpClient: sl<Dio>(),
-      tokenProvider: () async => sl<AuthRepository>().getValidAccessToken(),
-    ),
-  );
-
   // ------------------------
-// MODULES
-// ------------------------
-  sl.registerLazySingleton<ModuleRepository>(
-        () => ModuleRepositoryImpl(
-      local: sl<ModuleLocalDataSource>(),
-      remote: sl<ModuleRemoteDataSource>(),
-    ),
-  );
-
+  // MODULES
+  // ------------------------
   sl.registerLazySingleton<ModuleLocalDataSource>(
-        () => ModuleLocalDataSourceImpl(
-      sl<ModuleDao>(),
-      sl<TestPlansDao>(),
-    ),
-  );
+          () => ModuleLocalDataSourceImpl(sl<ModuleDao>(), sl<TestPlansDao>()));
 
   sl.registerLazySingleton<ModuleRemoteDataSource>(
-        () => ModuleRemoteDataSourceImpl(
-      httpClient: sl<Dio>(),
-      tokenProvider: () async => sl<AuthRepository>().getValidAccessToken(),
-    ),
-  );
+          () => ModuleRemoteDataSourceImpl(
+        httpClient: sl(),
+        tokenProvider: () async => sl<AuthRepository>().getValidAccessToken(),
+      ));
 
-// Usecases
+  sl.registerLazySingleton<ModuleRepository>(
+          () => ModuleRepositoryImpl(local: sl(), remote: sl()));
+
   sl.registerLazySingleton(() => GetModulesForProject(sl()));
   sl.registerLazySingleton(() => GetSubmodulesForModule(sl()));
   sl.registerLazySingleton(() => GetTestPlansForModule(sl()));
@@ -170,44 +160,39 @@ Future<void> init() async {
   sl.registerLazySingleton(() => UpdateTestPlan(sl()));
   sl.registerLazySingleton(() => DeleteTestPlan(sl()));
 
-  sl.registerFactory(
-        () => ModuleBloc(
-      getModulesForProject: sl(),
-      getSubmodulesForModule: sl(),
-      getTestPlansForModule: sl(),
-      saveVisitedModules: sl(),
-      getVisitedModules: sl(),
-      createModule: sl(),
-      updateModule: sl(),
-      deleteModule: sl(),
-      createTestPlan: sl(),
-      updateTestPlan: sl(),
-      deleteTestPlan: sl(),
-    ),
-  );
-
-  // ------------------------
-  // COMMENTS
-  // ------------------------
-  sl.registerLazySingleton<CommentRepository>(() => CommentRepositoryImpl(sl()));
-  sl.registerLazySingleton(() => GetCommentsForCase(sl()));
-  sl.registerLazySingleton(() => AddComment(sl()));
-  sl.registerLazySingleton(() => DeleteComment(sl()));
-  sl.registerFactory(() => CommentBloc(
-    getCommentsForCase: sl(),
-    addComment: sl(),
-    deleteComment: sl(),
+  sl.registerFactory(() => ModuleBloc(
+    getModulesForProject: sl(),
+    getSubmodulesForModule: sl(),
+    getTestPlansForModule: sl(),
+    saveVisitedModules: sl(),
+    getVisitedModules: sl(),
+    createModule: sl(),
+    updateModule: sl(),
+    deleteModule: sl(),
+    createTestPlan: sl(),
+    updateTestPlan: sl(),
+    deleteTestPlan: sl(),
   ));
 
   // ------------------------
-  // TEST PLANS
+  // TEST CASES
   // ------------------------
-  sl.registerLazySingleton<TestPlanRepository>(() => TestPlanRepositoryImpl(sl()));
+  sl.registerLazySingleton<TestCaseLocalDataSource>(
+          () => TestCaseLocalDataSourceImpl(sl<TestCasesDao>()));
+
+  sl.registerLazySingleton<TestCasesRemoteDataSource>(
+          () => TestCasesRemoteDataSourceImpl(
+        httpClient: sl(),
+        tokenProvider: () async => sl<AuthRepository>().getValidAccessToken(),
+      ));
+
+  sl.registerLazySingleton<TestCaseRepository>(
+          () => TestCaseRepositoryImpl(local: sl(), remote: sl()));
+
   sl.registerLazySingleton(() => GetTestCasesForPlan(sl()));
   sl.registerLazySingleton(() => CreateTestCase(sl()));
   sl.registerLazySingleton(() => UpdateTestCase(sl()));
   sl.registerLazySingleton(() => DeleteTestCase(sl()));
-  sl.registerLazySingleton(() => GetTestCaseById(sl()));
 
   sl.registerFactory(() => TestPlanBloc(
     getTestCasesForPlan: sl(),
@@ -217,9 +202,10 @@ Future<void> init() async {
   ));
 
   // ------------------------
-  // TEST CASES & STEPS
+  // TEST STEPS
   // ------------------------
-  sl.registerLazySingleton<TestCaseRepository>(() => TestStepRepositoryImpl(sl()));
+  sl.registerLazySingleton<TestStepRepository>(
+          () => TestStepRepositoryImpl(sl()));
 
   sl.registerLazySingleton(() => GetTestStepsForCase(sl()));
   sl.registerLazySingleton(() => CreateTestStep(sl()));
@@ -227,11 +213,6 @@ Future<void> init() async {
   sl.registerLazySingleton(() => DeleteTestStep(sl()));
   sl.registerLazySingleton(() => UpdateTestStepOrder(sl()));
 
-  // 🌟 GLOBAL LOGIKA STATUSÓW (USECASE)
-  sl.registerLazySingleton(() =>
-      RecalculateTestCaseProgress(stepRepo: sl<TestCaseRepository>(), caseRepo: sl<TestPlanRepository>()));
-
-  // TestStepBloc
   sl.registerFactory(() => TestStepBloc(
     getTestStepsForCase: sl(),
     createTestStep: sl(),
@@ -242,97 +223,83 @@ Future<void> init() async {
   ));
 
   // ------------------------
+  // COMMENTS
+  // ------------------------
+  sl.registerLazySingleton<CommentRepository>(
+          () => CommentRepositoryImpl(sl()));
+
+  sl.registerLazySingleton(() => GetCommentsForCase(sl()));
+  sl.registerLazySingleton(() => AddComment(sl()));
+  sl.registerLazySingleton(() => DeleteComment(sl()));
+
+  sl.registerFactory(() => CommentBloc(
+    getCommentsForCase: sl(),
+    addComment: sl(),
+    deleteComment: sl(),
+  ));
+
+  // ------------------------
+  // TEST EXECUTION
+  // ------------------------
+  sl.registerLazySingleton<TestExecutionRepository>(
+          () => TestExecutionRepositoryImpl(
+        projectDao: sl(),
+        moduleDao: sl(),
+        testPlansDao: sl(),
+        testCasesDao: sl(),
+        testStepsDao: sl(),
+        fileService: sl(),
+      ));
+
+  sl.registerLazySingleton(
+          () => GetAllProjectsForTestsUseCase(sl()));
+  sl.registerLazySingleton(
+          () => GetProjectStructure(sl()));
+  sl.registerLazySingleton(
+          () => UpdateStepTempStatus(sl()));
+  sl.registerLazySingleton(
+          () => ExportToFile(sl()));
+
+  sl.registerFactory(() => TestExecutionBloc(
+    getAllProjectsUseCase: sl(),
+    getProjectStructure: sl(),
+    updateStepTempStatus: sl(),
+    exportToFile: sl(),
+  ));
+
+  // ------------------------
   // NAVIGATION
   // ------------------------
   sl.registerLazySingleton<NavigationRepository>(() => NavigationRepositoryImpl());
   sl.registerLazySingleton(() => SaveVisitedModules(sl()));
   sl.registerLazySingleton(() => GetVisitedModules(sl()));
 
-
+  sl.registerLazySingleton<FileService>(() => FileService());
   sl.registerLazySingleton<Directory>(() => Directory.current);
 
-  sl.registerLazySingleton<FileService>(() => FileService());
-
-  // TESTEXECUTION
-
-  sl.registerLazySingleton<TestExecutionRepository>(
-        () => TestExecutionRepositoryImpl(
-      projectDao: sl<ProjectDao>(),
-      moduleDao: sl<ModuleDao>(),
-      testPlansDao: sl<TestPlansDao>(),
-      testCasesDao: sl<TestCasesDao>(),
-      testStepsDao: sl<TestStepsDao>(),
-          fileService: sl(),
-    ),
-  );
-
-  sl.registerLazySingleton<GetAllProjectsForTestsUseCase>(
-        () => GetAllProjectsForTestsUseCase(sl<TestExecutionRepository>()),
-  );
-
-  sl.registerLazySingleton(
-        () => GetProjectStructure(sl<TestExecutionRepository>()),
-  );
-
-  sl.registerLazySingleton(
-        () => UpdateStepTempStatus(sl<TestExecutionRepository>()),
-  );
-  sl.registerLazySingleton(
-          () => ExportToFile(sl()));
-
-  sl.registerFactory(
-        () => TestExecutionBloc(
-      getAllProjectsUseCase: sl<GetAllProjectsForTestsUseCase>(),
-      getProjectStructure: sl<GetProjectStructure>(),
-      updateStepTempStatus: sl<UpdateStepTempStatus>(),
-          exportToFile: sl<ExportToFile>(),
-    ),
-  );
-  //MICROSOFT LISTS
-
+  // ------------------------
+  // AUTH
+  // ------------------------
   sl.registerLazySingleton<PkceService>(() => PkceService());
   sl.registerLazySingleton<FlutterSecureStorage>(() => const FlutterSecureStorage());
-
-  sl.registerLazySingleton<Dio>(() => Dio(
-    BaseOptions(
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
-    ),
-  ));
+  sl.registerLazySingleton<Dio>(() => Dio());
 
   sl.registerLazySingleton<AuthRemoteDataSource>(
-        () => AuthRemoteDataSourceImpl(sl<Dio>()),
-  );
+          () => AuthRemoteDataSourceImpl(sl()));
 
-// ----------------------
-// Repository
-// ----------------------
   sl.registerLazySingleton<AuthRepository>(
-        () => AuthRepositoryImpl(
-      remote: sl<AuthRemoteDataSource>(),
-      pkceService: sl<PkceService>(),
-      secureStorage: sl<FlutterSecureStorage>(),
-    ),
-  );
+          () => AuthRepositoryImpl(
+        remote: sl(),
+        pkceService: sl(),
+        secureStorage: sl(),
+      ));
 
+  sl.registerLazySingleton(
+          () => LoginUseCase(sl()));
 
-// ----------------------
-// UseCases
-// ----------------------
-  sl.registerLazySingleton<LoginUseCase>(
-        () => LoginUseCase(sl<AuthRepository>()),
-  );
-
-// ----------------------
-// Bloc
-// ----------------------
-  sl.registerFactory<AuthBloc>(
-        () => AuthBloc(
-      authRepository: sl<AuthRepository>(),
-      loginUseCase: sl<LoginUseCase>(),
-    ),
-  );
-
-
-
+  sl.registerFactory(
+          () => AuthBloc(
+        authRepository: sl(),
+        loginUseCase: sl(),
+      ));
 }
