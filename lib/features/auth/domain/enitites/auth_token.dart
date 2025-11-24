@@ -1,4 +1,11 @@
-class AuthToken {
+class AuthTokens {
   final String accessToken;
-  AuthToken(this.accessToken);
+  final String refreshToken;
+  final DateTime expiresAt;
+
+  AuthTokens({
+    required this.accessToken,
+    required this.refreshToken,
+    required this.expiresAt,
+  });
 }

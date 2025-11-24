@@ -1,4 +1,7 @@
 abstract class AuthRepository {
-  Future<String> loginWithCode(String code);
   Future<String> createLoginUrl();
+  Future<void> loginWithCode(String code);
+  Future<String> getValidAccessToken();
+  Future<void> logout();
+  Future<bool> isLoggedIn();
 }

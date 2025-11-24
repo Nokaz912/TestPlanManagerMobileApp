@@ -1,12 +1,17 @@
+import 'dart:async';
+import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:test_plan_manager_app/features/project_list/presentation/bloc/project_event.dart';
-import 'package:test_plan_manager_app/features/project_list/presentation/bloc/project_state.dart';
 
-import '../../../../core/usecases/usecase.dart';
+import '../../../../core/error/failures.dart';
+import '../../domain/entities/project.dart';
 import '../../domain/usecases/create_new_project.dart';
 import '../../domain/usecases/delete_project.dart';
 import '../../domain/usecases/get_all_projects.dart';
 import '../../domain/usecases/update_project.dart';
+import '../../../../core/usecases/usecase.dart';
+
+import 'project_event.dart';
+import 'project_state.dart';
 
 class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
   final GetAllProjects getAllProjects;
@@ -32,13 +37,17 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
       ) async {
     emit(const ProjectState.loading());
 
-    (await getAllProjects(NoParams())).fold(
-          (failure) => emit(ProjectState.failure(
-        errorMessage: failure.message ?? 'Wystąpił nieznany błąd',
-      )),
-          (projects) => emit(ProjectState.success(
-        projects: projects,
-      )),
+    await emit.forEach<Either<Failure, List<ProjectEntity>>>(
+      getAllProjects(NoParams()),
+      onData: (either) =>
+          either.fold(
+                (f) =>
+                ProjectState.failure(
+                    errorMessage: f.message ?? 'Błąd pobierania'),
+                (projects) => ProjectState.success(projects: projects),
+          ),
+      onError: (error, stackTrace) =>
+          ProjectState.failure(errorMessage: error.toString()),
     );
   }
 
@@ -47,10 +56,10 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
       Emitter<ProjectState> emit,
       ) async {
     emit(const ProjectState.loading());
-
-    (await createProject(CreateProjectParams(event.project))).fold(
-          (failure) => emit(ProjectState.failure(
-        errorMessage: failure.message ?? 'Błąd tworzenia projektu',
+    final res = await createProject(CreateProjectParams(event.project));
+    res.fold(
+          (f) => emit(ProjectState.failure(
+        errorMessage: f.message ?? f.toString(),
       )),
           (_) => add(const ProjectEvent.getAll()),
     );
@@ -61,10 +70,10 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
       Emitter<ProjectState> emit,
       ) async {
     emit(const ProjectState.loading());
-
-    (await updateProject(UpdateProjectParams(event.project))).fold(
-          (failure) => emit(ProjectState.failure(
-        errorMessage: failure.message ?? 'Błąd aktualizacji projektu',
+    final res = await updateProject(UpdateProjectParams(event.project));
+    res.fold(
+          (f) => emit(ProjectState.failure(
+        errorMessage: f.message ?? f.toString(),
       )),
           (_) => add(const ProjectEvent.getAll()),
     );
@@ -75,10 +84,10 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
       Emitter<ProjectState> emit,
       ) async {
     emit(const ProjectState.loading());
-
-    (await deleteProject(DeleteProjectParams(event.id))).fold(
-          (failure) => emit(ProjectState.failure(
-        errorMessage: failure.message ?? 'Błąd usuwania projektu',
+    final res = await deleteProject(DeleteProjectParams(event.id));
+    res.fold(
+          (f) => emit(ProjectState.failure(
+        errorMessage: f.message ?? f.toString(),
       )),
           (_) => add(const ProjectEvent.getAll()),
     );

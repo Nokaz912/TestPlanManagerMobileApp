@@ -1,3 +1,4 @@
+// login_usecase.dart
 import '../repositories/auth_repository.dart';
 
 class LoginUseCase {
@@ -5,7 +6,7 @@ class LoginUseCase {
 
   LoginUseCase(this.repository);
 
-  Future<String> call(String code) {
+  Future<void> call(String code) {
     return repository.loginWithCode(code);
   }
 }

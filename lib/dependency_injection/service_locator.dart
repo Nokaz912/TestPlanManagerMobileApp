@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:test_plan_manager_app/database/datasources/auth/auth.dart';
 
 // 🌍 GLOBAL
 import '../core/global/file_service/file_service.dart';
@@ -13,6 +15,15 @@ import '../core/global/navigation/domain/usecases/save_visited_modules.dart';
 // 🧩 DATABASE
 import '../core/global/pkce_service/pkce_service.dart';
 import '../core/usecases/impl/recalculate_testcase_progress.dart';
+import '../database/datasources/auth/auth_impl.dart';
+import '../database/datasources/module/local/modules_local_datasource.dart';
+import '../database/datasources/module/local/modules_local_datasource_impl.dart';
+import '../database/datasources/module/remote/modules_remote_datasource.dart';
+import '../database/datasources/module/remote/modules_remote_datasource_impl.dart';
+import '../database/datasources/projects/local/projects_local_datasource.dart';
+import '../database/datasources/projects/local/projects_local_datasource_impl.dart';
+import '../database/datasources/projects/remote/projects_remote_datasource_impl.dart';
+import '../database/datasources/projects/remote/projects_remote_datasource.dart';
 import '../database/drift_database/data.dart';
 import '../database/daos/comments_dao.dart';
 import '../database/daos/module_dao.dart';
@@ -22,7 +33,6 @@ import '../database/daos/test_plans_dao.dart';
 import '../database/daos/test_steps_dao.dart';
 
 // PROJECTS
-import '../database/graph/remote_datasource.dart';
 import '../features/auth/data/repositories/auth_repository_impl.dart';
 import '../features/auth/domain/repositories/auth_repository.dart';
 import '../features/auth/domain/usecases/login_usecase.dart';
@@ -103,19 +113,53 @@ Future<void> init() async {
   // ------------------------
   // PROJECTS
   // ------------------------
-  sl.registerLazySingleton<ProjectRepository>(() => ProjectRepositoryImpl(sl()));
+  sl.registerLazySingleton<ProjectRepository>(
+        () => ProjectRepositoryImpl(
+      local: sl<ProjectLocalDataSource>(),
+      remote: sl<ProjectsRemoteDataSource>(),
+    ),
+  );
   sl.registerLazySingleton(() => GetAllProjects(sl()));
   sl.registerLazySingleton(() => CreateProject(sl()));
   sl.registerLazySingleton(() => UpdateProject(sl()));
   sl.registerLazySingleton(() => DeleteProject(sl()));
   sl.registerFactory(() => ProjectBloc(sl(), sl(), sl(), sl()));
 
-  // ------------------------
-  // MODULES
-  // ------------------------
-  sl.registerLazySingleton<ModuleRepository>(
-          () => ModuleRepositoryImpl(sl<ModuleDao>(), sl<TestPlansDao>()));
+  sl.registerLazySingleton<ProjectLocalDataSource>(
+        () => ProjectLocalDataSourceImpl(sl<ProjectDao>()),
+  );
+  sl.registerLazySingleton<ProjectsRemoteDataSource>(
+        () => ProjectsRemoteDataSourceImpl(
+      httpClient: sl<Dio>(),
+      tokenProvider: () async => sl<AuthRepository>().getValidAccessToken(),
+    ),
+  );
 
+  // ------------------------
+// MODULES
+// ------------------------
+  sl.registerLazySingleton<ModuleRepository>(
+        () => ModuleRepositoryImpl(
+      local: sl<ModuleLocalDataSource>(),
+      remote: sl<ModuleRemoteDataSource>(),
+    ),
+  );
+
+  sl.registerLazySingleton<ModuleLocalDataSource>(
+        () => ModuleLocalDataSourceImpl(
+      sl<ModuleDao>(),
+      sl<TestPlansDao>(),
+    ),
+  );
+
+  sl.registerLazySingleton<ModuleRemoteDataSource>(
+        () => ModuleRemoteDataSourceImpl(
+      httpClient: sl<Dio>(),
+      tokenProvider: () async => sl<AuthRepository>().getValidAccessToken(),
+    ),
+  );
+
+// Usecases
   sl.registerLazySingleton(() => GetModulesForProject(sl()));
   sl.registerLazySingleton(() => GetSubmodulesForModule(sl()));
   sl.registerLazySingleton(() => GetTestPlansForModule(sl()));
@@ -126,19 +170,21 @@ Future<void> init() async {
   sl.registerLazySingleton(() => UpdateTestPlan(sl()));
   sl.registerLazySingleton(() => DeleteTestPlan(sl()));
 
-  sl.registerFactory(() => ModuleBloc(
-    getModulesForProject: sl(),
-    getSubmodulesForModule: sl(),
-    getTestPlansForModule: sl(),
-    saveVisitedModules: sl(),
-    getVisitedModules: sl(),
-    createModule: sl(),
-    updateModule: sl(),
-    deleteModule: sl(),
-    createTestPlan: sl(),
-    updateTestPlan: sl(),
-    deleteTestPlan: sl(),
-  ));
+  sl.registerFactory(
+        () => ModuleBloc(
+      getModulesForProject: sl(),
+      getSubmodulesForModule: sl(),
+      getTestPlansForModule: sl(),
+      saveVisitedModules: sl(),
+      getVisitedModules: sl(),
+      createModule: sl(),
+      updateModule: sl(),
+      deleteModule: sl(),
+      createTestPlan: sl(),
+      updateTestPlan: sl(),
+      deleteTestPlan: sl(),
+    ),
+  );
 
   // ------------------------
   // COMMENTS
@@ -247,11 +293,15 @@ Future<void> init() async {
   sl.registerLazySingleton<PkceService>(() => PkceService());
   sl.registerLazySingleton<FlutterSecureStorage>(() => const FlutterSecureStorage());
 
-// ----------------------
-// Data Sources
-// ----------------------
+  sl.registerLazySingleton<Dio>(() => Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
+    ),
+  ));
+
   sl.registerLazySingleton<AuthRemoteDataSource>(
-        () => AuthRemoteDataSource(),
+        () => AuthRemoteDataSourceImpl(sl<Dio>()),
   );
 
 // ----------------------
@@ -259,11 +309,12 @@ Future<void> init() async {
 // ----------------------
   sl.registerLazySingleton<AuthRepository>(
         () => AuthRepositoryImpl(
-      remoteDataSource: sl<AuthRemoteDataSource>(),
+      remote: sl<AuthRemoteDataSource>(),
       pkceService: sl<PkceService>(),
       secureStorage: sl<FlutterSecureStorage>(),
     ),
   );
+
 
 // ----------------------
 // UseCases
@@ -277,10 +328,11 @@ Future<void> init() async {
 // ----------------------
   sl.registerFactory<AuthBloc>(
         () => AuthBloc(
-      secureStorage: sl<FlutterSecureStorage>(),
+      authRepository: sl<AuthRepository>(),
       loginUseCase: sl<LoginUseCase>(),
     ),
   );
+
 
 
 }

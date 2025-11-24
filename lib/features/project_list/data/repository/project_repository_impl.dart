@@ -1,72 +1,62 @@
 import 'package:dartz/dartz.dart';
-import 'package:drift/drift.dart' as drift;
-import 'package:test_plan_manager_app/features/project_list/data/models/dtos/project_dto.dart';
+import 'package:test_plan_manager_app/database/drift_database/mappers/project_mapper.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../database/datasources/projects/local/projects_local_datasource.dart';
+import '../../../../database/datasources/projects/remote/projects_remote_datasource.dart';
 import '../../../../database/drift_database/data.dart';
-import '../../../../database/daos/project_dao.dart';
 import '../../domain/entities/project.dart';
 import '../../domain/repository/project_repository.dart';
 
 class ProjectRepositoryImpl implements ProjectRepository {
-  final ProjectDao dao;
+  final ProjectLocalDataSource local;
+  final ProjectsRemoteDataSource remote;
 
-  ProjectRepositoryImpl(this.dao);
-
-  @override
-  Future<Either<Failure, List<ProjectEntity>>> getAllProjects() async {
-    try {
-      final result = await dao.getAllProjects();
-      final entities = result.map((p) => p.toEntity()).toList();
-      return Right(entities);
-    } catch (e) {
-      return Left(DatabaseFailure('Błąd pobierania projektów: $e'));
-    }
-  }
+  ProjectRepositoryImpl({
+    required this.local,
+    required this.remote,
+  });
 
   @override
-  Future<Either<Failure, void>> createProject(ProjectEntity project) async {
-    try {
-      await dao.insertProject(
-        ProjectsCompanion.insert(
-          id: project.id,
-          name: project.name,
-          description: (project.description != null &&
-              project.description!.trim().isNotEmpty)
-              ? drift.Value(project.description!)
-              : const drift.Value(null),
-          createdAtUtc: drift.Value(project.createdAtUtc),
-        ),
+  Stream<Either<Failure, List<ProjectEntity>>> getAllProjects() async* {
+    final localResult = await local.getAllProjects();
+
+    if (localResult.isRight()) {
+      yield Right(
+        localResult
+            .getOrElse(() => [])
+            .map((p) => p.toEntity())
+            .toList(),
       );
-      return const Right(null);
-    } catch (e) {
-      return Left(DatabaseFailure('Błąd tworzenia projektu: $e'));
     }
-  }
 
-  @override
-  Future<Either<Failure, void>> updateProject(ProjectEntity project) async {
     try {
-      await dao.updateProject(
-        ProjectsCompanion(
-          id: drift.Value(project.id),
-          name: drift.Value(project.name),
-          description: drift.Value(project.description ?? ''),
-          createdAtUtc: drift.Value(project.createdAtUtc),
-        ),
+      final remoteDtos = await remote.fetchProjects();
+
+      for (final dto in remoteDtos) {
+        await local.upsertProject(dto.toDbModel());
+      }
+
+      final refreshed = await local.getAllProjects();
+      yield refreshed.map(
+            (projects) => projects.map((p) => p.toEntity()).toList(),
       );
-      return const Right(null);
     } catch (e) {
-      return Left(DatabaseFailure('Błąd aktualizacji projektu: $e'));
+      yield Left(DatabaseFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, void>> deleteProject(String id) async {
-    try {
-      await dao.deleteProject(id);
-      return const Right(null);
-    } catch (e) {
-      return Left(DatabaseFailure('Błąd usuwania projektu: $e'));
-    }
+  Future<Either<Failure, void>> createProject(ProjectEntity project) {
+    return local.createProject(project.toDbModel());
+  }
+
+  @override
+  Future<Either<Failure, void>> updateProject(ProjectEntity project) {
+    return local.updateProject(project.toDbModel());
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteProject(String id) {
+    return local.deleteProject(id);
   }
 }

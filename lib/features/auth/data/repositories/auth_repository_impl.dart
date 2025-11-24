@@ -1,28 +1,31 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../../core/config/app_config.dart';
 import '../../../../core/global/pkce_service/pkce_service.dart';
-import '../../../../database/graph/remote_datasource.dart';
+import '../../../../database/datasources/auth/auth.dart';
+import '../../domain/enitites/auth_token.dart';
 import '../../domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthRemoteDataSource remoteDataSource;
-  final PkceService pkceService;
+  final AuthRemoteDataSource remote;
   final FlutterSecureStorage secureStorage;
+  final PkceService pkceService;
 
-  static const _pkceKey = "pkce_verifier";
+  static const _pkceKey = "pkce";
+  static const _accessKey = "access_token";
+  static const _refreshKey = "refresh_token";
+  static const _expKey = "expires_at";
 
   PkcePair? _pkce;
 
   AuthRepositoryImpl({
-    required this.remoteDataSource,
-    required this.pkceService,
+    required this.remote,
     required this.secureStorage,
+    required this.pkceService,
   });
 
   @override
   Future<String> createLoginUrl() async {
     _pkce = pkceService.generate();
-
     await secureStorage.write(key: _pkceKey, value: _pkce!.verifier);
 
     final scope = Uri.encodeComponent(AuthConfig.scopes.join(" "));
@@ -39,30 +42,56 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<String> loginWithCode(String code) async {
-    final storedVerifier = await secureStorage.read(key: _pkceKey);
+  Future<void> loginWithCode(String code) async {
+    final verifier = await secureStorage.read(key: _pkceKey);
+    if (verifier == null) throw Exception("Missing PKCE verifier");
 
-    if (storedVerifier == null || storedVerifier.isEmpty) {
-      throw Exception(
-        "Brak PKCE verifier — najpierw wywołaj createLoginUrl() i wróć z logowania.",
-      );
-    }
-
-    final token = await remoteDataSource.exchangeCode(
+    final tokens = await remote.exchangeCode(
       code: code,
-      verifier: storedVerifier,
+      verifier: verifier,
     );
 
     await secureStorage.delete(key: _pkceKey);
 
-    return token;
+    await _saveTokens(tokens);
   }
 
   @override
-  PkcePair get currentPkce {
-    if (_pkce == null) {
-      throw Exception("PKCE nie zostało jeszcze wygenerowane.");
+  Future<String> getValidAccessToken() async {
+    final access = await secureStorage.read(key: _accessKey);
+    final refresh = await secureStorage.read(key: _refreshKey);
+    final expStr = await secureStorage.read(key: _expKey);
+
+    if (access == null || refresh == null || expStr == null) {
+      throw Exception("Not logged in");
     }
-    return _pkce!;
+
+    final exp = DateTime.parse(expStr);
+
+    if (exp.isAfter(DateTime.now().add(const Duration(minutes: 1)))) {
+      return access;
+    }
+
+    final newTokens = await remote.refreshToken(refresh);
+    await _saveTokens(newTokens);
+
+    return newTokens.accessToken;
+  }
+
+  @override
+  Future<void> logout() async {
+    await secureStorage.deleteAll();
+  }
+
+  @override
+  Future<bool> isLoggedIn() async {
+    return await secureStorage.read(key: _accessKey) != null;
+  }
+
+  Future<void> _saveTokens(AuthTokens tokens) async {
+    await secureStorage.write(key: _accessKey, value: tokens.accessToken);
+    await secureStorage.write(key: _refreshKey, value: tokens.refreshToken);
+    await secureStorage.write(
+        key: _expKey, value: tokens.expiresAt.toIso8601String());
   }
 }

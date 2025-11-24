@@ -4,8 +4,8 @@ import '../entities/module.dart';
 import '../entities/test_plan.dart';
 
 abstract class ModuleRepository {
-  Future<Either<Failure, List<ModuleEntity>>> getAllModules();
-  Future<Either<Failure, List<ModuleEntity>>> getModulesForProject(String projectId);
+  Stream<Either<Failure, List<ModuleEntity>>> getModulesForProject(String projectId);
+
   Future<Either<Failure, List<ModuleEntity>>> getSubmodules(String moduleId);
   Future<Either<Failure, List<TestPlanEntity>>> getPlansForModule(String moduleId);
 

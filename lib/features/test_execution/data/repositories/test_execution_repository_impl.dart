@@ -43,8 +43,16 @@ class TestExecutionRepositoryImpl implements TestExecutionRepository {
   @override
   Future<Either<Failure, List<ProjectEntity>>> getAllProjectsForTests() async {
     try {
-      final projectDtos = await projectDao.getAllProjects();
-      final entities = projectDtos.map((e) => e.toEntity()).toList();
+      final projects = await projectDao.getAllProjects();
+
+      final entities = projects.map(
+            (p) => ProjectEntity(
+          id: p.id,
+          name: p.name,
+          description: p.description,
+          createdAtUtc: p.createdAtUtc,
+        ),
+      ).toList();
 
       return Right(entities);
     } catch (e) {
@@ -54,61 +62,27 @@ class TestExecutionRepositoryImpl implements TestExecutionRepository {
 
   @override
   Future<Either<Failure, ProjectStructureEntity>> getProjectStructure(
-      String projectId) async {
+      String projectId,
+      ) async {
     try {
-      final projectDto = (await projectDao.getAllProjects()).firstWhere((p) =>
-      p.id == projectId);
-      final projectEntity = projectDto.toEntity();
+      final projects = await projectDao.getAllProjects();
 
-      final moduleDtos = await moduleDao.getModulesForProject(projectId);
-      final moduleEntities = <ModuleStructureEntity>[];
+      final project = projects.firstWhere(
+            (p) => p.id == projectId,
+        orElse: () => throw Exception("Projekt nie istnieje"),
+      );
 
-      for (final module in moduleDtos) {
-        final moduleEntity = module.toEntity();
-
-        final planDtos = await testPlansDao.getPlansByModuleId(module.id);
-        final planEntities = <PlanStructureEntity>[];
-
-        for (final plan in planDtos) {
-          final planEntity = plan.toEntity();
-
-          final caseDtos = await testCasesDao.getCasesForPlan(plan.id);
-          final caseEntities = <CaseStructureEntity>[];
-
-          for (final c in caseDtos) {
-            final caseEntity = c.toEntity();
-
-            final stepDtos = await testStepsDao.getStepsForCase(c.id);
-            final stepEntities = stepDtos.map((s) => s.toEntity()).toList();
-
-            caseEntities.add(
-              CaseStructureEntity(
-                testCase: caseEntity,
-                steps: stepEntities,
-              ),
-            );
-          }
-
-          planEntities.add(
-            PlanStructureEntity(
-              plan: planEntity,
-              cases: caseEntities,
-            ),
-          );
-        }
-
-        moduleEntities.add(
-          ModuleStructureEntity(
-            module: moduleEntity,
-            plans: planEntities,
-          ),
-        );
-      }
+      final projectEntity = ProjectEntity(
+        id: project.id,
+        name: project.name,
+        description: project.description,
+        createdAtUtc: project.createdAtUtc,
+      );
 
       return Right(
         ProjectStructureEntity(
           project: projectEntity,
-          modules: moduleEntities,
+          modules: const [], // Brak modułów w tej wersji
         ),
       );
     } catch (e) {

@@ -1,8 +1,14 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../../core/error/failures.dart';
+import '../../../../core/usecases/usecase.dart';
 import '../../../../core/global/navigation/domain/usecases/get_visited_modules.dart';
 import '../../../../core/global/navigation/domain/usecases/save_visited_modules.dart';
+
 import '../../domain/entities/module.dart';
 import '../../domain/entities/test_plan.dart';
+
 import '../../domain/usecases/create_module.dart';
 import '../../domain/usecases/create_test_plan.dart';
 import '../../domain/usecases/delete_module.dart';
@@ -12,6 +18,7 @@ import '../../domain/usecases/get_submodules_for_module.dart';
 import '../../domain/usecases/get_test_plan_for_modules.dart';
 import '../../domain/usecases/update_module.dart';
 import '../../domain/usecases/update_test_plan.dart';
+
 import 'module_event.dart';
 import 'module_state.dart';
 
@@ -19,11 +26,14 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
   final GetModulesForProject getModulesForProject;
   final GetSubmodulesForModule getSubmodulesForModule;
   final GetTestPlansForModule getTestPlansForModule;
+
   final SaveVisitedModules saveVisitedModules;
   final GetVisitedModules getVisitedModules;
+
   final CreateModule createModule;
   final UpdateModule updateModule;
   final DeleteModule deleteModule;
+
   final CreateTestPlan createTestPlan;
   final UpdateTestPlan updateTestPlan;
   final DeleteTestPlan deleteTestPlan;
@@ -41,93 +51,78 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
     required this.updateTestPlan,
     required this.deleteTestPlan,
   }) : super(const ModuleState.initial()) {
-    on<GetModulesForProjectEvent>(_onGetModulesForProject);
-    on<GetSubmodulesForModuleEvent>(_onGetSubmodulesForModule);
-    on<LoadPreviewForModuleEvent>(_onLoadPreviewForModule);
+    on<GetModulesForProjectEvent>(_onGetModules);
+    on<GetSubmodulesForModuleEvent>(_onGetSubmodules);
+    on<LoadPreviewForModuleEvent>(_onPreviewForModule);
     on<NavigateBackEvent>(_onNavigateBack);
     on<SetVisitedPathEvent>(_onSetVisitedPath);
+
     on<CreateModuleEvent>(_onCreateModule);
     on<UpdateModuleEvent>(_onUpdateModule);
     on<DeleteModuleEvent>(_onDeleteModule);
+
     on<CreateTestPlanEvent>(_onCreateTestPlan);
     on<UpdateTestPlanEvent>(_onUpdateTestPlan);
     on<DeleteTestPlanEvent>(_onDeleteTestPlan);
   }
 
-  Future<void> _onGetModulesForProject(
+  Future<void> _onGetModules(
       GetModulesForProjectEvent event,
       Emitter<ModuleState> emit,
       ) async {
     emit(const ModuleState.loading());
 
-    (await getModulesForProject(ProjectIdParams(event.projectId))).fold(
-          (failure) {
-        emit(
-          ModuleState.failure(
-            errorMessage: failure.message ?? 'Wystąpił nieznany błąd',
-          ),
-        );
-      },
-          (modules) {
+    await emit.forEach<List<ModuleEntity>>(
+      getModulesForProject(ProjectIdParams(event.projectId)),
+      onData: (modules) {
         final visited = getVisitedModules(event.projectId);
 
-        emit(
-          ModuleState.success(
-            modules: modules,
-            submodules: const {},
-            testPlans: const {},
-            visitedModules: visited,
-            currentProjectId: event.projectId,
-            projectName: event.projectName,
-          ),
+        return ModuleState.success(
+          modules: modules,
+          submodules: const {},
+          testPlans: const {},
+          visitedModules: visited,
+          currentProjectId: event.projectId,
+          projectName: event.projectName,
         );
       },
+      onError: (err, _) =>
+          ModuleState.failure(errorMessage: err.toString()),
     );
   }
 
-  Future<void> _onLoadPreviewForModule(
+  Future<void> _onPreviewForModule(
       LoadPreviewForModuleEvent event,
       Emitter<ModuleState> emit,
       ) async {
     final current = state;
     if (current is! ModuleSuccess) return;
 
-    final moduleId = event.moduleId;
+    final id = event.moduleId;
 
-    final alreadyLoaded =
-        (current.submodules[moduleId]?.isNotEmpty ?? false) ||
-            (current.testPlans[moduleId]?.isNotEmpty ?? false);
+    if (current.submodules[id]?.isNotEmpty == true ||
+        current.testPlans[id]?.isNotEmpty == true) return;
 
-    if (alreadyLoaded) return;
+    final updatedSub = Map.of(current.submodules);
+    final updatedPlans = Map.of(current.testPlans);
 
-    final updatedSubmodules =
-    Map<String, List<ModuleEntity>>.from(current.submodules);
-    final updatedTestPlans =
-    Map<String, List<TestPlanEntity>>.from(current.testPlans);
+    final subs = await getSubmodulesForModule(ParentModuleIdParams(id));
+    subs.fold((_) {}, (list) {
+      updatedSub[id] = list.take(3).toList();
+    });
 
-    (await getSubmodulesForModule(ParentModuleIdParams(moduleId))).fold(
-          (_) {},
-          (subs) {
-        updatedSubmodules[moduleId] = subs.take(3).toList();
-      },
-    );
+    final plans = await getTestPlansForModule(ModuleIdParams(id));
+    plans.fold((_) {}, (list) {
+      updatedPlans[id] = list.take(3).toList();
+    });
 
-    (await getTestPlansForModule(ModuleIdParams(moduleId))).fold(
-          (_) {},
-          (plans) {
-        updatedTestPlans[moduleId] = plans.take(3).toList();
-      },
-    );
-
-    emit(
-      current.copyWith(
-        submodules: updatedSubmodules,
-        testPlans: updatedTestPlans,
-      ),
-    );
+    emit(current.copyWith(
+      submodules: updatedSub,
+      testPlans: updatedPlans,
+    ));
   }
 
-  Future<void> _onGetSubmodulesForModule(
+  Future<void> _onGetSubmodules(
       GetSubmodulesForModuleEvent event,
       Emitter<ModuleState> emit,
       ) async {
@@ -138,84 +133,37 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
     final projectId = current.currentProjectId;
     if (projectId == null) return;
 
-    final alreadyCached = current.submodules.containsKey(moduleId);
-
-    if (alreadyCached) {
-      final visited = getVisitedModules(projectId);
-
-      if (!visited.contains(moduleId)) {
-        final updatedVisited = [...visited, moduleId];
-        saveVisitedModules(projectId, updatedVisited);
-        emit(current.copyWith(visitedModules: updatedVisited));
-      } else {
-        emit(current.copyWith(visitedModules: visited));
-      }
-
-      return;
-    }
-
-    final previousSubmodules =
-    Map<String, List<ModuleEntity>>.from(current.submodules);
-    final previousTestPlans =
-    Map<String, List<TestPlanEntity>>.from(current.testPlans);
-
     emit(const ModuleState.loading());
 
-    final updatedSubmodules = Map<String, List<ModuleEntity>>.from(
-      previousSubmodules,
-    );
-    final updatedTestPlans = Map<String, List<TestPlanEntity>>.from(
-      previousTestPlans,
-    );
+    final subsResult =
+    await getSubmodulesForModule(ParentModuleIdParams(moduleId));
+    final plansResult =
+    await getTestPlansForModule(ModuleIdParams(moduleId));
 
-    String? errorMessage;
+    final Map<String, List<ModuleEntity>> sub = Map.of(current.submodules);
+    final Map<String, List<TestPlanEntity>> plan = Map.of(current.testPlans);
 
-    (await getSubmodulesForModule(ParentModuleIdParams(moduleId))).fold(
-          (failure) {
-        errorMessage = failure.message ?? 'Wystąpił nieznany błąd';
-      },
-          (modules) {
-        updatedSubmodules[moduleId] = modules;
-      },
-    );
+    String? error;
 
-    if (errorMessage != null) {
-      emit(
-        ModuleState.failure(errorMessage: errorMessage!),
-      );
+    subsResult.fold((f) => error = f.message, (list) => sub[moduleId] = list);
+    plansResult.fold((f) => error = f.message, (list) => plan[moduleId] = list);
+
+    if (error != null) {
+      emit(ModuleState.failure(errorMessage: error!));
       return;
     }
 
-    (await getTestPlansForModule(ModuleIdParams(moduleId))).fold(
-          (failure) {
-        errorMessage = failure.message ?? 'Wystąpił nieznany błąd';
-      },
-          (plans) {
-        updatedTestPlans[moduleId] = plans;
-      },
-    );
+    final visited = [...getVisitedModules(projectId), moduleId];
+    saveVisitedModules(projectId, visited);
 
-    if (errorMessage != null) {
-      emit(
-        ModuleState.failure(errorMessage: errorMessage!),
-      );
-      return;
-    }
-
-    final currentVisited = getVisitedModules(projectId);
-    final updatedVisited = [...currentVisited, moduleId];
-    saveVisitedModules(projectId, updatedVisited);
-
-    emit(
-      ModuleState.success(
-        modules: current.modules,
-        submodules: updatedSubmodules,
-        testPlans: updatedTestPlans,
-        visitedModules: updatedVisited,
-        currentProjectId: projectId,
-        projectName: current.projectName,
-      ),
-    );
+    emit(ModuleState.success(
+      modules: current.modules,
+      submodules: sub,
+      testPlans: plan,
+      visitedModules: visited,
+      currentProjectId: projectId,
+      projectName: current.projectName,
+    ));
   }
 
   Future<void> _onNavigateBack(
@@ -228,54 +176,40 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
     final visited = getVisitedModules(event.projectId);
 
     if (visited.isNotEmpty) {
-      final shortened = [...visited]..removeLast();
-      saveVisitedModules(event.projectId, shortened);
+      visited.removeLast();
+      saveVisitedModules(event.projectId, visited);
 
-      emit(
-        current.copyWith(visitedModules: shortened),
-      );
+      emit(current.copyWith(visitedModules: visited));
       return;
     }
 
     saveVisitedModules(event.projectId, []);
-
-    emit(
-      current.copyWith(visitedModules: const []),
-    );
+    emit(current.copyWith(visitedModules: []));
   }
 
   Future<void> _onSetVisitedPath(
       SetVisitedPathEvent event,
       Emitter<ModuleState> emit,
       ) async {
-    saveVisitedModules(event.projectId, [...event.visited]);
+    saveVisitedModules(event.projectId, event.visited);
 
     final current = state;
     if (current is ModuleSuccess) {
-      emit(
-        current.copyWith(visitedModules: [...event.visited]),
-      );
+      emit(current.copyWith(visitedModules: event.visited));
     }
   }
 
-  Future<void> _refresh({String? moduleId}) async {
+  Future<void> _refresh([String? parentModule]) async {
     final current = state;
     if (current is! ModuleSuccess) return;
 
-    final projectId = current.currentProjectId;
-    if (projectId == null) return;
-
-    if (moduleId == null) {
-      add(
-        ModuleEvent.getModulesForProject(
-          projectId: projectId,
-          projectName: current.projectName,
-        ),
-      );
+    if (parentModule == null) {
+      add(ModuleEvent.getModulesForProject(
+        projectId: current.currentProjectId!,
+        projectName: current.projectName,
+      ));
     } else {
-      add(
-        ModuleEvent.getSubmodulesForModule(moduleId: moduleId),
-      );
+      add(ModuleEvent.getSubmodulesForModule(moduleId: parentModule));
     }
   }
 
@@ -284,24 +218,11 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
       Emitter<ModuleState> emit,
       ) async {
     emit(const ModuleState.loading());
-
-    String? errorMessage;
-
-    (await createModule(CreateModuleParams(event.module))).fold(
-          (failure) {
-        errorMessage = failure.message ?? 'Wystąpił nieznany błąd';
-      },
-          (_) {},
+    final res = await createModule(CreateModuleParams(event.module));
+    res.fold(
+          (f) => emit(ModuleState.failure(errorMessage: f.message ?? 'error')),
+          (_) => _refresh(event.module.parentModuleId),
     );
-
-    if (errorMessage != null) {
-      emit(
-        ModuleState.failure(errorMessage: errorMessage!),
-      );
-      return;
-    }
-
-    await _refresh(moduleId: event.module.parentModuleId);
   }
 
   Future<void> _onUpdateModule(
@@ -309,24 +230,11 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
       Emitter<ModuleState> emit,
       ) async {
     emit(const ModuleState.loading());
-
-    String? errorMessage;
-
-    (await updateModule(UpdateModuleParams(event.module))).fold(
-          (failure) {
-        errorMessage = failure.message ?? 'Wystąpił nieznany błąd';
-      },
-          (_) {},
+    final res = await updateModule(UpdateModuleParams(event.module));
+    res.fold(
+          (f) => emit(ModuleState.failure(errorMessage: f.message ?? 'error')),
+          (_) => _refresh(event.module.parentModuleId),
     );
-
-    if (errorMessage != null) {
-      emit(
-        ModuleState.failure(errorMessage: errorMessage!),
-      );
-      return;
-    }
-
-    await _refresh(moduleId: event.module.parentModuleId);
   }
 
   Future<void> _onDeleteModule(
@@ -334,24 +242,11 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
       Emitter<ModuleState> emit,
       ) async {
     emit(const ModuleState.loading());
-
-    String? errorMessage;
-
-    (await deleteModule(DeleteModuleParams(event.moduleId))).fold(
-          (failure) {
-        errorMessage = failure.message ?? 'Wystąpił nieznany błąd';
-      },
-          (_) {},
+    final res = await deleteModule(DeleteModuleParams(event.moduleId));
+    res.fold(
+          (f) => emit(ModuleState.failure(errorMessage: f.message ?? 'error')),
+          (_) => _refresh(event.moduleId),
     );
-
-    if (errorMessage != null) {
-      emit(
-        ModuleState.failure(errorMessage: errorMessage!),
-      );
-      return;
-    }
-
-    await _refresh(moduleId: event.moduleId);
   }
 
   Future<void> _onCreateTestPlan(
@@ -359,24 +254,11 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
       Emitter<ModuleState> emit,
       ) async {
     emit(const ModuleState.loading());
-
-    String? errorMessage;
-
-    (await createTestPlan(CreateTestPlanParams(event.plan))).fold(
-          (failure) {
-        errorMessage = failure.message ?? 'Wystąpił nieznany błąd';
-      },
-          (_) {},
+    final res = await createTestPlan(CreateTestPlanParams(event.plan));
+    res.fold(
+          (f) => emit(ModuleState.failure(errorMessage: f.message ?? 'error')),
+          (_) => _refresh(event.plan.moduleId),
     );
-
-    if (errorMessage != null) {
-      emit(
-        ModuleState.failure(errorMessage: errorMessage!),
-      );
-      return;
-    }
-
-    await _refresh(moduleId: event.plan.moduleId);
   }
 
   Future<void> _onUpdateTestPlan(
@@ -384,24 +266,11 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
       Emitter<ModuleState> emit,
       ) async {
     emit(const ModuleState.loading());
-
-    String? errorMessage;
-
-    (await updateTestPlan(UpdateTestPlanParams(event.plan))).fold(
-          (failure) {
-        errorMessage = failure.message ?? 'Wystąpił nieznany błąd';
-      },
-          (_) {},
+    final res = await updateTestPlan(UpdateTestPlanParams(event.plan));
+    res.fold(
+          (f) => emit(ModuleState.failure(errorMessage: f.message ?? 'error')),
+          (_) => _refresh(event.plan.moduleId),
     );
-
-    if (errorMessage != null) {
-      emit(
-        ModuleState.failure(errorMessage: errorMessage!),
-      );
-      return;
-    }
-
-    await _refresh(moduleId: event.plan.moduleId);
   }
 
   Future<void> _onDeleteTestPlan(
@@ -409,32 +278,10 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
       Emitter<ModuleState> emit,
       ) async {
     emit(const ModuleState.loading());
-
-    String? errorMessage;
-
-    (await deleteTestPlan(DeleteTestPlanParams(event.testPlanId))).fold(
-          (failure) {
-        errorMessage = failure.message ?? 'Wystąpił nieznany błąd';
-      },
-          (_) {},
+    final res = await deleteTestPlan(DeleteTestPlanParams(event.testPlanId));
+    res.fold(
+          (f) => emit(ModuleState.failure(errorMessage: f.message ?? 'error')),
+          (_) => _refresh(),
     );
-
-    if (errorMessage != null) {
-      emit(
-        ModuleState.failure(errorMessage: errorMessage!),
-      );
-      return;
-    }
-
-    final current = state;
-    if (current is! ModuleSuccess) {
-      await _refresh();
-      return;
-    }
-
-    final lastModuleId =
-    current.visitedModules.isNotEmpty ? current.visitedModules.last : null;
-
-    await _refresh(moduleId: lastModuleId);
   }
 }
