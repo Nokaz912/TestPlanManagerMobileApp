@@ -28,11 +28,6 @@ class TestCaseDto {
     this.passedSteps,
   });
 
-  factory TestCaseDto.fromJson(Map<String, dynamic> json) =>
-      _$TestCaseDtoFromJson(json);
-
-  Map<String, dynamic> toJson() => _$TestCaseDtoToJson(this);
-
   factory TestCaseDto.fromGraphJson(Map<String, dynamic> json) {
     final fields = json['fields'] ?? {};
 
@@ -45,46 +40,54 @@ class TestCaseDto {
     }
 
     return TestCaseDto(
-      id: json['id'] as String,
-      planId: fields['planId'] as String? ?? '',
-      title: fields['Title'] ?? fields['title'] ?? '',
-      status: fields['status'] as String?,
-      assignedToUserId: fields['assignedToUserId'] as String?,
-      expectedResult: fields['expectedResult'] as String?,
+      id: fields['id0'] ?? json['id'],
+      planId: fields['planId'] ?? '',
+      title: fields['title0'] ?? '',
+      status: fields['status'],
+      assignedToUserId: fields['assignedToUserId'],
+      expectedResult: fields['expectedResult'],
+      parentCaseId: fields['parentCaseId'],
       lastModifiedUtc: fields['lastModifiedUtc'] != null
           ? DateTime.parse(fields['lastModifiedUtc'])
           : null,
-      parentCaseId: fields['parentCaseId'] as String?,
       totalSteps: _toInt(fields['totalSteps']) ?? 0,
       passedSteps: _toInt(fields['passedSteps']) ?? 0,
     );
   }
 
+
   Map<String, dynamic> toGraphCreateJson() {
     return {
       "fields": {
+        "id0": id,
         "planId": planId,
-        "Title": title,
+        "title0": title,
         "status": status,
         "assignedToUserId": assignedToUserId,
         "expectedResult": expectedResult,
-        "lastModifiedUtc": lastModifiedUtc?.toIso8601String(),
         "parentCaseId": parentCaseId,
+        "lastModifiedUtc": lastModifiedUtc?.toIso8601String(),
         "totalSteps": totalSteps ?? 0,
         "passedSteps": passedSteps ?? 0,
       }
     };
   }
 
+
   Map<String, dynamic> toGraphUpdateJson() {
-    return {
-      "status": status,
-      "assignedToUserId": assignedToUserId,
-      "expectedResult": expectedResult,
-      "lastModifiedUtc": lastModifiedUtc?.toIso8601String(),
-      "parentCaseId": parentCaseId,
-      "totalSteps": totalSteps ?? 0,
-      "passedSteps": passedSteps ?? 0,
-    };
+    final map = <String, dynamic>{};
+
+    map["title0"] = title;
+    if (status != null) map["status"] = status;
+    if (assignedToUserId != null) map["assignedToUserId"] = assignedToUserId;
+    if (expectedResult != null) map["expectedResult"] = expectedResult;
+    if (parentCaseId != null) map["parentCaseId"] = parentCaseId;
+    if (lastModifiedUtc != null)
+      map["lastModifiedUtc"] = lastModifiedUtc!.toIso8601String();
+    if (totalSteps != null) map["totalSteps"] = totalSteps;
+    if (passedSteps != null) map["passedSteps"] = passedSteps;
+
+    return map;
   }
 }
+

@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:test_plan_manager_app/database/datasources/testcase/remote/testcase_remote_datasource.dart';
 import 'package:test_plan_manager_app/features/test_plan_list/data/models/dtos/test_case_dto.dart';
 
-
 class TestCasesRemoteDataSourceImpl implements TestCasesRemoteDataSource {
   final Dio httpClient;
   final Future<String> Function() tokenProvider;
@@ -22,6 +21,12 @@ class TestCasesRemoteDataSourceImpl implements TestCasesRemoteDataSource {
   String get _itemsUrl =>
       "https://graph.microsoft.com/v1.0/sites/$_siteId/lists/$_testCasesListId/items?expand=fields";
 
+  String _updateUrl(String id) =>
+      "https://graph.microsoft.com/v1.0/sites/$_siteId/lists/$_testCasesListId/items/$id/fields";
+
+  String _deleteUrl(String id) =>
+      "https://graph.microsoft.com/v1.0/sites/$_siteId/lists/$_testCasesListId/items/$id";
+
   @override
   Future<List<TestCaseDto>> fetchTestCasesForPlan(String planId) async {
     final token = await tokenProvider();
@@ -40,5 +45,68 @@ class TestCasesRemoteDataSourceImpl implements TestCasesRemoteDataSource {
     final dtos = data.map((e) => TestCaseDto.fromGraphJson(e)).toList();
 
     return dtos.where((c) => c.planId == planId).toList();
+  }
+
+  @override
+  Future<TestCaseDto> createTestCase(TestCaseDto dto) async {
+    final token = await tokenProvider();
+
+    final response = await httpClient.post(
+      _itemsUrl,
+      options: Options(
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      ),
+      data: dto.toGraphCreateJson(),
+    );
+
+    return TestCaseDto.fromGraphJson(response.data);
+  }
+
+  @override
+  Future<TestCaseDto> updateTestCase(TestCaseDto dto) async {
+    final token = await tokenProvider();
+    final id = dto.id!;
+
+    await httpClient.patch(
+      _updateUrl(id),
+      data: dto.toGraphUpdateJson(),
+      options: Options(
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+          "If-Match": "*",
+        },
+      ),
+    );
+
+    final refreshed = await httpClient.get(
+      "https://graph.microsoft.com/v1.0/sites/$_siteId/lists/$_testCasesListId/items/$id?expand=fields",
+      options: Options(
+        headers: {
+          "Authorization": "Bearer $token",
+        },
+      ),
+    );
+
+    return TestCaseDto.fromGraphJson(refreshed.data);
+  }
+
+
+  @override
+  Future<void> deleteTestCase(String id) async {
+    final token = await tokenProvider();
+
+    await httpClient.delete(
+      _deleteUrl(id),
+      options: Options(
+        headers: {
+          "Authorization": "Bearer $token",
+          "If-Match": "*",
+        },
+      ),
+    );
   }
 }
