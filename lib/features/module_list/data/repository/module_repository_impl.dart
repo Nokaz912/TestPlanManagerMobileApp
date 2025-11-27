@@ -128,14 +128,9 @@ class ModuleRepositoryImpl implements ModuleRepository {
       try {
         await local.upsertTestPlan(updatedDto.toDbModel());
       } catch (e, s) {
-        print("LOCAL DB UPDATE ERROR: $e");
-        print(s);
       }
-
       return Right(entity);
     } catch (e, s) {
-      print("REMOTE UPDATE ERROR: $e");
-      print(s);
       return Left(DatabaseFailure("Nie udało się zaktualizować planu testów."));
     }
   }

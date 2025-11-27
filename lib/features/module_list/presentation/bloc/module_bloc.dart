@@ -133,14 +133,11 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
 
     await emit.forEach<List<TestPlanEntity>>(
       getTestPlansForModule(ModuleIdParams(moduleId)),
-      onData: (plans) {
-        return current.copyWith(
-          submodules: updatedSubs,
-          testPlans: {...current.testPlans, moduleId: plans},
-        );
-      },
-      onError: (err, _) =>
-          ModuleState.failure(errorMessage: err.toString()),
+      onData: (plans) => current.copyWith(
+        submodules: updatedSubs,
+        testPlans: {...current.testPlans, moduleId: plans},
+      ),
+      onError: (err, _) => ModuleState.failure(errorMessage: err.toString()),
     );
   }
 
@@ -219,14 +216,14 @@ class ModuleBloc extends Bloc<ModuleEvent, ModuleState> {
   }
 
   Future<void> _onDeleteModule(
-    DeleteModuleEvent event,
-    Emitter<ModuleState> emit,
-  ) async {
-    emit(const ModuleState.loading());
+      DeleteModuleEvent event,
+      Emitter<ModuleState> emit,
+      ) async {
     final res = await deleteModule(DeleteModuleParams(event.moduleId));
+
     res.fold(
-      (f) => emit(ModuleState.failure(errorMessage: f.message ?? 'error')),
-      (_) => _refresh(event.moduleId),
+          (f) => emit(ModuleState.failure(errorMessage: f.message ?? 'error')),
+          (_) => _refresh(),
     );
   }
 
