@@ -11,7 +11,7 @@ class TestStepDto {
   final String? expected;
   final String status;
 
-  TestStepDto({
+  const TestStepDto({
     required this.id,
     required this.testCaseId,
     required this.stepNumber,
@@ -28,11 +28,18 @@ class TestStepDto {
   factory TestStepDto.fromGraphJson(Map<String, dynamic> json) {
     final fields = json['fields'] ?? {};
 
+    int? _toInt(dynamic v) {
+      if (v == null) return null;
+      if (v is int) return v;
+      if (v is double) return v.toInt();
+      if (v is String) return int.tryParse(v);
+      return null;
+    }
+
     return TestStepDto(
-      id: json['id'],
-      // ID SharePoint item
+      id: fields['id0'] ?? json['id'],
       testCaseId: fields['testCaseId'] ?? '',
-      stepNumber: (fields['stepNumber'] as num?)?.toInt() ?? 0,
+      stepNumber: _toInt(fields['stepNumber']) ?? 0,
       description: fields['description'] ?? '',
       expected: fields['expected'],
       status: fields['status'] ?? 'NotRun',
@@ -40,24 +47,29 @@ class TestStepDto {
   }
 
   Map<String, dynamic> toGraphCreateJson() {
+    final title = "Step $stepNumber";
     return {
       "fields": {
+        "id0": id,
         "testCaseId": testCaseId,
         "stepNumber": stepNumber,
         "description": description,
         "expected": expected,
         "status": status,
-      },
+        "Title": title,
+      }
     };
   }
 
   Map<String, dynamic> toGraphUpdateJson() {
-    return {
-      "fields": {
-        "description": description,
-        "expected": expected,
-        "status": status,
-      },
-    };
+    final map = <String, dynamic>{};
+
+    map["description"] = description;
+    map["status"] = status;
+    map["stepNumber"] = stepNumber;
+
+    if (expected != null) map["expected"] = expected;
+
+    return map;
   }
 }

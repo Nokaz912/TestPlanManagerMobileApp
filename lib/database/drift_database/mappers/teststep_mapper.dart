@@ -4,8 +4,7 @@ import '../../../features/test_step_list/data/models/dtos/test_step_dto.dart';
 import '../../../features/test_step_list/domain/entities/test_step.dart';
 import '../data.dart';
 
-/// 🔥 Mapper DB row → Entity (czyli rekord z bazy → obiekt domenowy)
-extension TestStepDataMapper on TestStep {
+extension TestStepDomainEntityMapper on TestStep {
   TestStepEntity toEntity() {
     return TestStepEntity(
       id: id,
@@ -18,7 +17,71 @@ extension TestStepDataMapper on TestStep {
   }
 }
 
-/// 🔥 Mapper Entity → DB Companion (do insert/update)
+extension TestStepEntityDomainMapper on TestStepEntity {
+  TestStep toDomain() {
+    return TestStep(
+      id: id,
+      testCaseId: testCaseId,
+      stepNumber: stepNumber,
+      description: description,
+      expected: expected,
+      status: status,
+    );
+  }
+}
+
+extension TestStepDtoDomainMapper on TestStepDto {
+  TestStep toDomain() {
+    return TestStep(
+      id: id,
+      testCaseId: testCaseId,
+      stepNumber: stepNumber,
+      description: description,
+      expected: expected,
+      status: status,
+    );
+  }
+}
+
+extension TestStepDomainDtoMapper on TestStep {
+  TestStepDto toDto() {
+    return TestStepDto(
+      id: id,
+      testCaseId: testCaseId,
+      stepNumber: stepNumber,
+      description: description,
+      expected: expected,
+      status: status,
+    );
+  }
+}
+
+extension TestStepEntityDtoMapper on TestStepEntity {
+  TestStepDto toDto() {
+    return TestStepDto(
+      id: id,
+      testCaseId: testCaseId,
+      stepNumber: stepNumber,
+      description: description,
+      expected: expected,
+      status: status,
+    );
+  }
+}
+
+extension TestStepDtoEntityMapper on TestStepDto {
+  TestStepEntity toEntity() {
+    return TestStepEntity(
+      id: id,
+      testCaseId: testCaseId,
+      stepNumber: stepNumber,
+      description: description,
+      expected: expected,
+      status: status,
+    );
+  }
+}
+
 extension TestStepEntityDbMapper on TestStepEntity {
   TestStepsCompanion toDbModel() {
     return TestStepsCompanion(
@@ -34,7 +97,6 @@ extension TestStepEntityDbMapper on TestStepEntity {
   }
 }
 
-/// 🔥 Mapper DTO (z remote) → DB Companion
 extension TestStepDtoDbMapper on TestStepDto {
   TestStepsCompanion toDbModel() {
     return TestStepsCompanion(

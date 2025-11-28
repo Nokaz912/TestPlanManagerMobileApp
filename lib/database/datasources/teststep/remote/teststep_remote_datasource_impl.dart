@@ -18,15 +18,21 @@ class TestStepRemoteDataSourceImpl implements TestStepRemoteDataSource {
 
   static const _testStepsListId = "7c8bed07-f4a9-4133-bf78-f0fcfe1dd72a";
 
-  String get _stepsItemsUrl =>
+  String get _itemsUrl =>
       "https://graph.microsoft.com/v1.0/sites/$_siteId/lists/$_testStepsListId/items?expand=fields";
+
+  String _updateUrl(String id) =>
+      "https://graph.microsoft.com/v1.0/sites/$_siteId/lists/$_testStepsListId/items/$id/fields";
+
+  String _deleteUrl(String id) =>
+      "https://graph.microsoft.com/v1.0/sites/$_siteId/lists/$_testStepsListId/items/$id";
 
   @override
   Future<List<TestStepDto>> fetchStepsForCase(String testCaseId) async {
     final token = await tokenProvider();
 
     final res = await httpClient.get(
-      _stepsItemsUrl,
+      _itemsUrl,
       options: Options(
         headers: {
           "Authorization": "Bearer $token",
@@ -35,8 +41,71 @@ class TestStepRemoteDataSourceImpl implements TestStepRemoteDataSource {
       ),
     );
 
-    final List items = res.data["value"];
-    final dtos = items.map((e) => TestStepDto.fromGraphJson(e)).toList();
+    final List data = res.data["value"];
+    final dtos = data.map((e) => TestStepDto.fromGraphJson(e)).toList();
     return dtos.where((s) => s.testCaseId == testCaseId).toList();
+  }
+
+  @override
+  Future<TestStepDto> createStep(TestStepDto dto) async {
+    final token = await tokenProvider();
+
+    final res = await httpClient.post(
+      _itemsUrl,
+      data: dto.toGraphCreateJson(),
+      options: Options(
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      ),
+    );
+
+    return TestStepDto.fromGraphJson(res.data);
+  }
+
+  @override
+  Future<TestStepDto> updateStep(TestStepDto dto) async {
+    final token = await tokenProvider();
+    final id = dto.id;
+
+    await httpClient.patch(
+      _updateUrl(id),
+      data: dto.toGraphUpdateJson(),
+      options: Options(
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+          "If-Match": "*",
+        },
+      ),
+    );
+
+    final refreshed = await httpClient.get(
+      "https://graph.microsoft.com/v1.0/sites/$_siteId/lists/$_testStepsListId/items/$id?expand=fields",
+      options: Options(
+        headers: {
+          "Authorization": "Bearer $token",
+        },
+      ),
+    );
+
+    return TestStepDto.fromGraphJson(refreshed.data);
+  }
+
+
+  @override
+  Future<void> deleteStep(String id) async {
+    final token = await tokenProvider();
+
+    await httpClient.delete(
+      _deleteUrl(id),
+      options: Options(
+        headers: {
+          "Authorization": "Bearer $token",
+          "If-Match": "*",
+        },
+      ),
+    );
   }
 }
