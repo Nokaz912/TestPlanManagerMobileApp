@@ -67,31 +67,37 @@ class TestStepRemoteDataSourceImpl implements TestStepRemoteDataSource {
   @override
   Future<TestStepDto> updateStep(TestStepDto dto) async {
     final token = await tokenProvider();
-    final id = dto.id;
 
-    await httpClient.patch(
-      _updateUrl(id),
-      data: dto.toGraphUpdateJson(),
-      options: Options(
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-          "If-Match": "*",
-        },
-      ),
-    );
+    if (dto.id == null) {
+      throw Exception("TestStepDto.id cannot be null for update");
+    }
 
-    final refreshed = await httpClient.get(
-      "https://graph.microsoft.com/v1.0/sites/$_siteId/lists/$_testStepsListId/items/$id?expand=fields",
-      options: Options(
-        headers: {
-          "Authorization": "Bearer $token",
-        },
-      ),
-    );
+    try {
+      final res = await httpClient.patch(
+        _updateUrl(dto.id!),
+        data: dto.toGraphUpdateJson(),
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+            "If-Match": "*",
+          },
+        ),
+      );
 
-    return TestStepDto.fromGraphJson(refreshed.data);
+      print("PATCH OK status: ${res.statusCode}");
+      print("PATCH data: ${res.data}");
+
+      return TestStepDto.fromGraphFieldsJson(res.data, dto);
+    } catch (e) {
+      print("UPDATE STEP FAILED ❌");
+      print("ERROR: $e");
+      rethrow; // <-- POZWALASZ żeby poszło do repo
+    }
   }
+
+
+
 
 
   @override

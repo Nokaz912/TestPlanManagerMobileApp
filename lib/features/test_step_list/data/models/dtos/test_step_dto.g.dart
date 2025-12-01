@@ -7,7 +7,7 @@ part of 'test_step_dto.dart';
 // **************************************************************************
 
 TestStepDto _$TestStepDtoFromJson(Map<String, dynamic> json) => TestStepDto(
-  id: json['id'] as String,
+  id: json['id'] as String?,
   testCaseId: json['testCaseId'] as String,
   stepNumber: (json['stepNumber'] as num).toInt(),
   description: json['description'] as String,

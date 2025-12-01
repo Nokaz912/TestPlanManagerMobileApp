@@ -20,7 +20,6 @@ class TestStepsDao extends DatabaseAccessor<AppDatabase>
   Future<void> insertStep(TestStepsCompanion step) =>
       into(db.testSteps).insert(step);
 
-  /// 🔥 UPSERT — insert or update
   Future<void> upsertStep(TestStepsCompanion step) =>
       into(db.testSteps).insertOnConflictUpdate(step);
 

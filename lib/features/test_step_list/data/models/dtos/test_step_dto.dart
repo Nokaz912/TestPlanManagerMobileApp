@@ -4,7 +4,7 @@ part 'test_step_dto.g.dart';
 
 @JsonSerializable()
 class TestStepDto {
-  final String id;
+  final String? id;
   final String testCaseId;
   final int stepNumber;
   final String description;
@@ -12,7 +12,7 @@ class TestStepDto {
   final String status;
 
   const TestStepDto({
-    required this.id,
+    this.id,
     required this.testCaseId,
     required this.stepNumber,
     required this.description,
@@ -25,51 +25,81 @@ class TestStepDto {
 
   Map<String, dynamic> toJson() => _$TestStepDtoToJson(this);
 
+  /// --- GET / POST z Graph API ---
+  /// JSON:
+  /// {
+  ///   "id": "...",
+  ///   "fields": { "...": "...", ... }
+  /// }
   factory TestStepDto.fromGraphJson(Map<String, dynamic> json) {
-    final fields = json['fields'] ?? {};
+    final fields = json['fields'] as Map<String, dynamic>?;
 
-    int? _toInt(dynamic v) {
-      if (v == null) return null;
+    int parseStep(dynamic v) {
       if (v is int) return v;
       if (v is double) return v.toInt();
-      if (v is String) return int.tryParse(v);
-      return null;
+      if (v is String) return int.tryParse(v) ?? 0;
+      return 0;
     }
 
     return TestStepDto(
-      id: fields['id0'] ?? json['id'],
-      testCaseId: fields['testCaseId'] ?? '',
-      stepNumber: _toInt(fields['stepNumber']) ?? 0,
-      description: fields['description'] ?? '',
-      expected: fields['expected'],
-      status: fields['status'] ?? 'NotRun',
+      id: json['id']?.toString(),
+      testCaseId: fields?['testCaseId'] ?? '',
+      stepNumber: parseStep(fields?['stepNumber']),
+      description: fields?['description'] ?? '',
+      expected: fields?['expected'],
+      status: fields?['status'] ?? 'NotRun',
     );
   }
 
+  factory TestStepDto.fromGraphFieldsJson(
+      Map<String, dynamic> json,
+      TestStepDto original,
+      ) {
+    final fields = json['fields'] as Map<String, dynamic>?;
+
+    int parseStep(dynamic v) {
+      if (v == null) return original.stepNumber;
+
+      if (v is int) return v;
+      if (v is double) return v.toInt();
+      if (v is String) return int.tryParse(v) ?? original.stepNumber;
+
+      return original.stepNumber;
+    }
+
+    return TestStepDto(
+      id: json['id']?.toString() ?? original.id,
+      testCaseId: fields?['testCaseId'] ?? original.testCaseId,
+      stepNumber: parseStep(fields?['stepNumber']),
+      description: fields?['description'] ?? original.description,
+      expected: fields?['expected'] ?? original.expected,
+      status: fields?['status'] ?? original.status,
+    );
+  }
+
+
+  /// --- Create ---
   Map<String, dynamic> toGraphCreateJson() {
-    final title = "Step $stepNumber";
     return {
       "fields": {
-        "id0": id,
         "testCaseId": testCaseId,
         "stepNumber": stepNumber,
         "description": description,
         "expected": expected,
         "status": status,
-        "Title": title,
       }
     };
   }
 
+  /// --- Update do /fields ---
+  /// UWAGA ↘️ tu NIE ma "fields"
   Map<String, dynamic> toGraphUpdateJson() {
-    final map = <String, dynamic>{};
-
-    map["description"] = description;
-    map["status"] = status;
-    map["stepNumber"] = stepNumber;
-
-    if (expected != null) map["expected"] = expected;
-
-    return map;
+    return {
+      "testCaseId": testCaseId,
+      "stepNumber": stepNumber,
+      "description": description,
+      "expected": expected,
+      "status": status,
+    };
   }
 }

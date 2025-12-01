@@ -55,6 +55,7 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
       CreateProjectEvent event,
       Emitter<ProjectState> emit,
       ) async {
+
     emit(const ProjectState.loading());
     final res = await createProject(CreateProjectParams(event.project));
     res.fold(

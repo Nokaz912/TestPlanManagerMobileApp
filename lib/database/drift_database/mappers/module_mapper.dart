@@ -15,6 +15,7 @@ extension ModuleDataMapper on Module {
   }
 }
 
+//TODO refactor to null safety
 extension ModuleEntityDbMapper on ModuleEntity {
   ModulesCompanion toDbModel() {
     return ModulesCompanion(
