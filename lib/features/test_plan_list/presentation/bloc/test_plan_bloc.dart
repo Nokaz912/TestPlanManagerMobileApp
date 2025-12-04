@@ -1,14 +1,12 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
-import 'package:dartz/dartz.dart';
-import 'package:test_plan_manager_app/core/error/failures.dart';
-import 'package:test_plan_manager_app/features/test_plan_list/domain/entities/test_case.dart';
+import 'test_plan_event.dart';
+import 'test_plan_state.dart';
+import '../../domain/entities/test_case.dart';
 import '../../domain/usecases/create_test_case.dart';
 import '../../domain/usecases/update_test_case.dart';
 import '../../domain/usecases/delete_test_case.dart';
 import '../../domain/usecases/get_test_cases_for_plan.dart';
-import 'test_plan_event.dart';
-import 'test_plan_state.dart';
 
 class TestPlanBloc extends Bloc<TestPlanEvent, TestPlanState> {
   final GetTestCasesForPlan getTestCasesForPlan;
@@ -16,94 +14,52 @@ class TestPlanBloc extends Bloc<TestPlanEvent, TestPlanState> {
   final UpdateTestCase updateTestCase;
   final DeleteTestCase deleteTestCase;
 
-  StreamSubscription<Either<Failure, List<TestCaseEntity>>>?
-  _testCasesSubscription;
-
   TestPlanBloc({
     required this.getTestCasesForPlan,
     required this.createTestCase,
     required this.updateTestCase,
     required this.deleteTestCase,
   }) : super(const TestPlanState.initial()) {
-    on<GetTestCasesForPlanEvent>(_onGetTestCasesForPlan);
-    on<CreateTestCaseEvent>(_onCreateTestCase);
-    on<UpdateTestCaseEvent>(_onUpdateTestCase);
-    on<DeleteTestCaseEvent>(_onDeleteTestCase);
+    on<GetTestCasesForPlanEvent>(_loadTestCases);
+    on<CreateTestCaseEvent>(_createCase);
+    on<UpdateTestCaseEvent>(_updateCase);
+    on<DeleteTestCaseEvent>(_deleteCase);
   }
 
-  Future<void> _onGetTestCasesForPlan(
+  Future<void> _loadTestCases(
       GetTestCasesForPlanEvent event,
       Emitter<TestPlanState> emit,
       ) async {
     emit(const TestPlanState.loading());
 
-    await emit.forEach(
+    await emit.forEach<List<TestCaseEntity>>(
       getTestCasesForPlan(PlanIdParams(event.planId)),
-      onData: (either) => either.fold(
-            (failure) => TestPlanState.failure(
-          errorMessage: failure.message ?? 'Wystąpił nieznany błąd',
-        ),
-            (cases) => TestPlanState.success(testCases: cases),
+      onData: (cases) => TestPlanState.success(testCases: cases),
+      onError: (error, _) => TestPlanState.failure(
+        errorMessage: error.toString(),
       ),
     );
   }
 
-
-  Future<void> _onCreateTestCase(
+  Future<void> _createCase(
       CreateTestCaseEvent event,
       Emitter<TestPlanState> emit,
       ) async {
-    await createTestCase(
-      CreateTestCaseParams(event.testCase),
-    );
-
-    add(
-      TestPlanEvent.getTestCasesForPlan(
-        planId: event.testCase.planId,
-      ),
-    );
+    await createTestCase(CreateTestCaseParams(event.testCase));
+    // STREAM sam zaktualizuje listę
   }
 
-  Future<void> _onUpdateTestCase(
+  Future<void> _updateCase(
       UpdateTestCaseEvent event,
       Emitter<TestPlanState> emit,
       ) async {
-    await updateTestCase(
-      UpdateTestCaseParams(event.testCase),
-    );
-
-    add(
-      TestPlanEvent.getTestCasesForPlan(
-        planId: event.testCase.planId,
-      ),
-    );
+    await updateTestCase(UpdateTestCaseParams(event.testCase));
   }
 
-  Future<void> _onDeleteTestCase(
+  Future<void> _deleteCase(
       DeleteTestCaseEvent event,
       Emitter<TestPlanState> emit,
       ) async {
-    final planId = state.maybeWhen(
-      success: (cases) => cases.isNotEmpty ? cases.first.planId : null,
-      orElse: () => null,
-    );
-
-    await deleteTestCase(
-      DeleteTestCaseParams(event.id),
-    );
-
-    if (planId != null) {
-      add(
-        TestPlanEvent.getTestCasesForPlan(
-          planId: planId,
-        ),
-      );
-    }
-  }
-
-  @override
-  Future<void> close() async {
-    await _testCasesSubscription?.cancel();
-    return super.close();
+    await deleteTestCase(DeleteTestCaseParams(event.id));
   }
 }

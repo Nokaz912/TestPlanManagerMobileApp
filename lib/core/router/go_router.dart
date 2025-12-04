@@ -1,6 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:test_plan_manager_app/features/module_list/presentation/bloc/module_state.dart';
+import 'package:test_plan_manager_app/features/test_plan_list/domain/usecases/get_test_cases_for_plan.dart';
+import 'package:test_plan_manager_app/features/test_plan_list/presentation/bloc/test_plan_bloc.dart';
+import 'package:test_plan_manager_app/features/test_plan_list/presentation/bloc/test_plan_event.dart';
+import 'package:test_plan_manager_app/features/test_step_list/presentation/bloc/test_step_bloc.dart';
+import 'package:test_plan_manager_app/features/test_step_list/presentation/bloc/test_step_event.dart';
 
 import '../../dependency_injection/service_locator.dart';
 
@@ -32,23 +37,24 @@ import '../../features/test_step_list/presentation/pages/test_steps_page.dart';
 final GoRouter router = GoRouter(
   initialLocation: '/start',
   routes: [
-    GoRoute(
-      path: '/start',
-      builder:
-          (context, state) => BlocProvider(
-            create: (_) => sl<AuthBloc>(),
-            child: const StartPage(),
-          ),
-    ),
+    ShellRoute(
+      builder: (context, state, child) {
+        return BlocProvider(
+          create: (_) => sl<AuthBloc>(),
+          child: child,
+        );
+      },
+      routes: [
+        GoRoute(
+          path: '/start',
+          builder: (context, state) => const StartPage(),
+        ),
 
-    // LOGIN PAGE
-    GoRoute(
-      path: '/login',
-      builder:
-          (context, state) => BlocProvider.value(
-            value: sl<AuthBloc>(),
-            child: const LoginPage(),
-          ),
+        GoRoute(
+          path: '/login',
+          builder: (context, state) => const LoginPage(),
+        ),
+      ],
     ),
 
     //------------------------------------------------------------
@@ -149,13 +155,18 @@ final GoRouter router = GoRouter(
         final planId = state.pathParameters['planId']!;
         final extra = state.extra as Map<String, String>? ?? {};
 
-        return TestPlanListPage(
-          planId: planId,
-          projectId: extra['projectId'] ?? '',
-          moduleId: extra['moduleId'] ?? '',
+        return BlocProvider(
+          create: (_) => sl<TestPlanBloc>()
+            ..add(TestPlanEvent.getTestCasesForPlan(planId: planId)),
+          child: TestPlanListPage(
+            planId: planId,
+            projectId: extra['projectId'] ?? '',
+            moduleId: extra['moduleId'] ?? '',
+          ),
         );
       },
     ),
+
 
     //------------------------------------------------------------
     // TEST CASE STEPS
@@ -167,14 +178,19 @@ final GoRouter router = GoRouter(
         final caseId = state.pathParameters['caseId']!;
         final extra = state.extra as Map<String, String>? ?? {};
 
-        return TestCasePage(
-          testCaseId: caseId,
-          projectId: extra['projectId'] ?? '',
-          moduleId: extra['moduleId'] ?? '',
-          planId: extra['planId'] ?? '',
+        return BlocProvider(
+          create: (_) => sl<TestStepBloc>()
+            ..add(TestStepEvent.getTestStepsForCase(testCaseId: caseId)),
+          child: TestCasePage(
+            testCaseId: caseId,
+            projectId: extra['projectId'] ?? '',
+            moduleId: extra['moduleId'] ?? '',
+            planId: extra['planId'] ?? '',
+          ),
         );
       },
     ),
+
 
     //------------------------------------------------------------
     // COMMENTS

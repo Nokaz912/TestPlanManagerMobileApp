@@ -31,10 +31,7 @@ class _TestPlanListPageState extends State<TestPlanListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<TestPlanBloc>(
-      create: (_) =>
-      di.sl<TestPlanBloc>()..add(TestPlanEvent.getTestCasesForPlan(planId: widget.planId)),
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: const Text('Test Cases'),
           leading: IconButton(
@@ -59,7 +56,6 @@ class _TestPlanListPageState extends State<TestPlanListPage> {
             );
           },
         ),
-      ),
     );
   }
 

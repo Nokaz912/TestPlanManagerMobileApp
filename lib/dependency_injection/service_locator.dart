@@ -14,6 +14,7 @@ import 'package:test_plan_manager_app/database/datasources/comments/remote/comme
 import 'package:test_plan_manager_app/database/datasources/teststep/local/teststep_local_datasource_impl.dart';
 import 'package:test_plan_manager_app/database/datasources/teststep/remote/teststep_remote_datasource.dart';
 import 'package:test_plan_manager_app/database/datasources/teststep/remote/teststep_remote_datasource_impl.dart';
+import 'package:test_plan_manager_app/features/test_plan_list/domain/services/testcase_service.dart';
 
 // 🌍 GLOBAL
 import '../core/global/file_service/file_service.dart';
@@ -206,7 +207,9 @@ Future<void> init() async {
       graphClient: sl<GraphClient>(),
     ),
   );
-
+  sl.registerLazySingleton<TestCaseService>(
+        () => TestCaseService(sl<TestStepRepository>()),
+  );
 
   sl.registerLazySingleton<TestCaseRepository>(
           () => TestCaseRepositoryImpl(local: sl(), remote: sl()));

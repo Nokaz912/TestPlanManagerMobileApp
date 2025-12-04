@@ -29,12 +29,7 @@ class TestCasePage extends StatefulWidget {
 class _TestCasePageState extends State<TestCasePage> {
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => di.sl<TestStepBloc>()
-        ..add(
-          TestStepEvent.getTestStepsForCase(testCaseId: widget.testCaseId),
-        ),
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: const Text('Kroki testowe'),
           leading: IconButton(
@@ -76,8 +71,7 @@ class _TestCasePageState extends State<TestCasePage> {
             );
           },
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildList(BuildContext context, List<TestStepEntity> steps) {
