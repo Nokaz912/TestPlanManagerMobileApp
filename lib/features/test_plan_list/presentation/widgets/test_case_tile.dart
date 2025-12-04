@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:test_plan_manager_app/core/UI/app_colors.dart';
+
 import '../../../test_plan_list/presentation/bloc/test_plan_bloc.dart';
 import '../../../test_plan_list/presentation/bloc/test_plan_event.dart';
 import '../../domain/entities/test_case.dart';
@@ -21,68 +23,17 @@ class TestCaseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = _statusColor(testCase.status);
+    final Color statusColor = _statusColor(testCase.status);
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.10)),
       ),
-      elevation: 2.0,
-      child: ListTile(
-        leading: Icon(Icons.bug_report, color: color),
-        title: Text(
-          testCase.title,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Text("Status: "),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 3.0,
-                    ),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(6.0),
-                    ),
-                    child: Text(
-                      testCase.status,
-                      style: TextStyle(
-                        color: color,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4.0),
-              Text(
-                "Kroki: ${testCase.passedSteps} / ${testCase.totalSteps}",
-                style: const TextStyle(
-                  fontSize: 12.0,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-        trailing: PopupMenuButton<String>(
-          onSelected: (value) {
-            if (value == 'edit') _openEditDialog(context);
-            if (value == 'delete') _confirmDelete(context);
-          },
-          itemBuilder: (context) => const [
-            PopupMenuItem(value: 'edit', child: Text('Edytuj')),
-            PopupMenuItem(value: 'delete', child: Text('Usuń')),
-          ],
-        ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
         onTap: () async {
           await context.push(
             '/cases/${testCase.id}/steps',
@@ -92,13 +43,114 @@ class TestCaseTile extends StatelessWidget {
               'projectId': projectId,
             },
           );
-          context.read<TestPlanBloc>().add(
-            TestPlanEvent.getTestCasesForPlan(planId: planId),
-          );
+          context
+              .read<TestPlanBloc>()
+              .add(TestPlanEvent.getTestCasesForPlan(planId: planId));
         },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              // ICON
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.bug_report_rounded,
+                  color: statusColor,
+                  size: 26,
+                ),
+              ),
+
+              const SizedBox(width: 14),
+
+              // TEXT CONTENT
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // TITLE
+                    Text(
+                      testCase.title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    // STATUS + STEPS
+                    Row(
+                      children: [
+                        _buildStatusBadge(statusColor, testCase.status),
+                        const SizedBox(width: 12),
+                        Text(
+                          "Kroki: ${testCase.passedSteps} / ${testCase.totalSteps}",
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // MENU
+              PopupMenuButton<String>(
+                color: AppColors.softViolet.withOpacity(0.9),
+                icon: const Icon(Icons.more_vert, color: Colors.white),
+                onSelected: (value) {
+                  if (value == 'edit') _openEditDialog(context);
+                  if (value == 'delete') _confirmDelete(context);
+                },
+                itemBuilder: (_) => const [
+                  PopupMenuItem(
+                    value: 'edit',
+                    child: Text("✏️ Edytuj", style: TextStyle(color: Colors.white)),
+                  ),
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Text("🗑 Usuń", style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
+
+  Widget _buildStatusBadge(Color color, String status) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.22),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.5)),
+      ),
+      child: Text(
+        status,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
+      ),
+    );
+  }
+
+  // ───────────────────
+  // Dialogs
+  // ───────────────────
 
   void _openEditDialog(BuildContext context) {
     final titleCtrl = TextEditingController(text: testCase.title);
@@ -108,7 +160,9 @@ class TestCaseTile extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Edytuj Test Case'),
+        backgroundColor: AppColors.softViolet.withOpacity(0.95),
+        title: const Text('Edytuj Test Case',
+            style: TextStyle(color: Colors.white)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -116,17 +170,18 @@ class TestCaseTile extends StatelessWidget {
               controller: titleCtrl,
               decoration: const InputDecoration(labelText: 'Tytuł'),
             ),
-            const SizedBox(height: 8.0),
+            const SizedBox(height: 8),
             TextField(
               controller: expectedCtrl,
-              decoration: const InputDecoration(labelText: 'Oczekiwany rezultat'),
+              decoration:
+              const InputDecoration(labelText: 'Oczekiwany rezultat'),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Anuluj'),
+            child: const Text('Anuluj', style: TextStyle(color: Colors.white70)),
           ),
           FilledButton(
             onPressed: () {
@@ -141,13 +196,14 @@ class TestCaseTile extends StatelessWidget {
                 assignedToUserId: testCase.assignedToUserId,
                 lastModifiedUtc: DateTime.now().toUtc(),
                 parentCaseId: testCase.parentCaseId,
-                totalSteps: testCase.totalSteps,
                 passedSteps: testCase.passedSteps,
+                totalSteps: testCase.totalSteps,
               );
 
-              context.read<TestPlanBloc>().add(
-                TestPlanEvent.updateTestCase(testCase: updated),
-              );
+              context
+                  .read<TestPlanBloc>()
+                  .add(TestPlanEvent.updateTestCase(testCase: updated));
+
               Navigator.pop(ctx);
             },
             child: const Text('Zapisz'),
@@ -161,18 +217,25 @@ class TestCaseTile extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Usuń Test Case'),
-        content: Text('Czy na pewno chcesz usunąć „${testCase.title}”?'),
+        backgroundColor: AppColors.softViolet.withOpacity(0.95),
+        title: const Text('Usuń Test Case',
+            style: TextStyle(color: Colors.white)),
+        content: Text(
+          'Czy na pewno chcesz usunąć „${testCase.title}”?',
+          style: const TextStyle(color: Colors.white70),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Anuluj'),
+            child: const Text('Anuluj', style: TextStyle(color: Colors.white70)),
           ),
           FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
             onPressed: () {
-              context.read<TestPlanBloc>().add(
-                TestPlanEvent.deleteTestCase(id: testCase.id),
-              );
+              context
+                  .read<TestPlanBloc>()
+                  .add(TestPlanEvent.deleteTestCase(id: testCase.id));
+
               Navigator.pop(ctx);
             },
             child: const Text('Usuń'),
@@ -185,11 +248,11 @@ class TestCaseTile extends StatelessWidget {
   Color _statusColor(String status) {
     switch (status) {
       case 'Passed':
-        return Colors.green;
+        return Colors.greenAccent;
       case 'Failed':
-        return Colors.red;
+        return Colors.redAccent;
       case 'Blocked':
-        return Colors.orange;
+        return Colors.orangeAccent;
       case 'NotRun':
       case 'Pending':
         return Colors.grey;

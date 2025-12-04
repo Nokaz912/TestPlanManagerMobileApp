@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../project_list/domain/entities/project.dart';
 import '../../../test_step_list/domain/entities/test_step.dart';
 import '../../domain/entities/project_structure.dart';
@@ -21,10 +22,14 @@ class _ExecutionPageState extends State<ExecutionPage> {
   String? selectedPlanId;
   String? selectedCaseId;
 
+  final Map<String, String> _localStepStatus = {};
+
   @override
   void initState() {
     super.initState();
-    context.read<TestExecutionBloc>().add(const TestExecutionEvent.getAllProjectsForTests());
+    context.read<TestExecutionBloc>().add(
+      const TestExecutionEvent.getAllProjectsForTests(),
+    );
   }
 
   @override
@@ -32,6 +37,11 @@ class _ExecutionPageState extends State<ExecutionPage> {
     return BlocConsumer<TestExecutionBloc, TestExecutionState>(
       listener: (context, state) {
         state.maybeWhen(
+          success: (_, __, fileGenerated) {
+            if (fileGenerated != null) {
+              _showFileSavedDialog(context, fileGenerated);
+            }
+          },
           failure: (msg) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(msg)),
@@ -47,7 +57,8 @@ class _ExecutionPageState extends State<ExecutionPage> {
             initial: () => const Center(child: CircularProgressIndicator()),
             loading: () => const Center(child: CircularProgressIndicator()),
             failure: (msg) => Center(child: Text(msg)),
-            success: (projects, structure) => _buildBody(projects, structure),
+            success: (projects, structure, _) =>
+                _buildBody(projects, structure),
           ),
         );
       },
@@ -99,22 +110,20 @@ class _ExecutionPageState extends State<ExecutionPage> {
       isExpanded: true,
       value: selectedProjectId,
       hint: const Text("Wybierz projekt"),
-      items: projects
-          .map(
-            (p) => DropdownMenuItem(
-          value: p.id,
-          child: Text(p.name),
-        ),
-      )
-          .toList(),
+      items: projects.map((p) {
+        return DropdownMenuItem(value: p.id, child: Text(p.name));
+      }).toList(),
       onChanged: (value) {
         if (value == null) return;
+
         setState(() {
           selectedProjectId = value;
           selectedModuleId = null;
           selectedPlanId = null;
           selectedCaseId = null;
+          _localStepStatus.clear();
         });
+
         context.read<TestExecutionBloc>().add(
           TestExecutionEvent.getProjectStructure(projectId: value),
         );
@@ -123,25 +132,19 @@ class _ExecutionPageState extends State<ExecutionPage> {
   }
 
   Widget _modulePicker(ProjectStructureEntity structure) {
-    final items = structure.modules;
-
     return DropdownButton<String>(
       isExpanded: true,
       value: selectedModuleId,
       hint: const Text("Wybierz moduł"),
-      items: items
-          .map(
-            (m) => DropdownMenuItem(
-          value: m.module.id,
-          child: Text(m.module.name),
-        ),
-      )
-          .toList(),
+      items: structure.modules.map((m) {
+        return DropdownMenuItem(value: m.module.id, child: Text(m.module.name));
+      }).toList(),
       onChanged: (value) {
         setState(() {
           selectedModuleId = value;
           selectedPlanId = null;
           selectedCaseId = null;
+          _localStepStatus.clear();
         });
       },
     );
@@ -149,49 +152,51 @@ class _ExecutionPageState extends State<ExecutionPage> {
 
   Widget _planPicker(ProjectStructureEntity structure) {
     if (selectedModuleId == null) return const SizedBox.shrink();
-    final module = structure.modules.firstWhere((m) => m.module.id == selectedModuleId);
+
+    final module =
+    structure.modules.firstWhere((m) => m.module.id == selectedModuleId);
 
     return DropdownButton<String>(
       isExpanded: true,
       value: selectedPlanId,
       hint: const Text("Wybierz plan testów"),
-      items: module.plans
-          .map(
-            (p) => DropdownMenuItem(
-          value: p.plan.id,
-          child: Text(p.plan.name),
-        ),
-      )
-          .toList(),
+      items: module.plans.map((p) {
+        return DropdownMenuItem(value: p.plan.id, child: Text(p.plan.name));
+      }).toList(),
       onChanged: (value) {
         setState(() {
           selectedPlanId = value;
           selectedCaseId = null;
+          _localStepStatus.clear();
         });
       },
     );
   }
 
   Widget _casePicker(ProjectStructureEntity structure) {
-    if (selectedModuleId == null || selectedPlanId == null) return const SizedBox.shrink();
+    if (selectedModuleId == null || selectedPlanId == null) {
+      return const SizedBox.shrink();
+    }
 
-    final module = structure.modules.firstWhere((m) => m.module.id == selectedModuleId);
+    final module =
+    structure.modules.firstWhere((m) => m.module.id == selectedModuleId);
     final plan = module.plans.firstWhere((p) => p.plan.id == selectedPlanId);
 
     return DropdownButton<String>(
       isExpanded: true,
       value: selectedCaseId,
       hint: const Text("Wybierz test case"),
-      items: plan.cases
-          .map(
-            (c) => DropdownMenuItem(
+      items: plan.cases.map((c) {
+        return DropdownMenuItem(
           value: c.testCase.id,
           child: Text(c.testCase.title),
-        ),
-      )
-          .toList(),
+        );
+      }).toList(),
       onChanged: (value) {
-        setState(() => selectedCaseId = value);
+        setState(() {
+          selectedCaseId = value;
+          _localStepStatus.clear();
+        });
       },
     );
   }
@@ -203,9 +208,11 @@ class _ExecutionPageState extends State<ExecutionPage> {
       return const Center(child: Text("Wybierz test case"));
     }
 
-    final module = structure.modules.firstWhere((m) => m.module.id == selectedModuleId);
+    final module =
+    structure.modules.firstWhere((m) => m.module.id == selectedModuleId);
     final plan = module.plans.firstWhere((p) => p.plan.id == selectedPlanId);
-    final caseNode = plan.cases.firstWhere((c) => c.testCase.id == selectedCaseId);
+    final caseNode =
+    plan.cases.firstWhere((c) => c.testCase.id == selectedCaseId);
 
     return ListView(
       children: caseNode.steps.map(_stepCard).toList(),
@@ -213,6 +220,8 @@ class _ExecutionPageState extends State<ExecutionPage> {
   }
 
   Widget _stepCard(TestStepEntity s) {
+    final selected = _localStepStatus[s.id];
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: Padding(
@@ -222,7 +231,9 @@ class _ExecutionPageState extends State<ExecutionPage> {
           children: [
             Text(
               "Krok ${s.stepNumber}",
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 6),
             Text(s.description),
@@ -231,10 +242,26 @@ class _ExecutionPageState extends State<ExecutionPage> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _statusBtn("Passed", () => _update(s, "Passed")),
-                  _statusBtn("Failed", () => _update(s, "Failed")),
-                  _statusBtn("Blocked", () => _update(s, "Blocked")),
-                  _statusBtn("Skipped", () => _update(s, "Skipped")),
+                  _statusBtn(
+                    "Passed",
+                        () => _update(s, "Passed"),
+                    isActive: selected == "Passed",
+                  ),
+                  _statusBtn(
+                    "Failed",
+                        () => _update(s, "Failed"),
+                    isActive: selected == "Failed",
+                  ),
+                  _statusBtn(
+                    "Blocked",
+                        () => _update(s, "Blocked"),
+                    isActive: selected == "Blocked",
+                  ),
+                  _statusBtn(
+                    "Skipped",
+                        () => _update(s, "Skipped"),
+                    isActive: selected == "Skipped",
+                  ),
                 ],
               ),
             ),
@@ -244,18 +271,37 @@ class _ExecutionPageState extends State<ExecutionPage> {
     );
   }
 
-  Widget _statusBtn(String txt, VoidCallback cb) {
+  Widget _statusBtn(
+      String txt,
+      VoidCallback cb, {
+        required bool isActive,
+      }) {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          backgroundColor: isActive ? Colors.blue.withOpacity(0.15) : null,
+          side: BorderSide(
+            color: isActive ? Colors.blue : Colors.grey,
+          ),
+        ),
         onPressed: cb,
-        child: Text(txt),
+        child: Text(
+          txt,
+          style: TextStyle(
+            color: isActive ? Colors.blue.shade800 : Colors.black,
+            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
       ),
     );
   }
 
-
   void _update(TestStepEntity s, String st) {
+    setState(() {
+      _localStepStatus[s.id] = st;
+    });
+
     context.read<TestExecutionBloc>().add(
       TestExecutionEvent.updateStepTempStatus(
         stepStatus: StepStatusPathEntity(
@@ -278,16 +324,43 @@ class _ExecutionPageState extends State<ExecutionPage> {
         title: const Text("Zakończyć testowanie?"),
         content: const Text("Wyeksportować raport?"),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("Nie")),
-          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text("Tak")),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text("Nie"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text("Tak"),
+          ),
         ],
       ),
     );
 
     if (res == true) {
-      context.read<TestExecutionBloc>().add(const TestExecutionEvent.exportToFile());
+      context
+          .read<TestExecutionBloc>()
+          .add(const TestExecutionEvent.exportToFile());
     } else {
       context.go('/projects');
     }
+  }
+
+  void _showFileSavedDialog(BuildContext context, String path) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Raport zapisany"),
+        content: Text("Plik został zapisany:\n\n$path"),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              context.go('/projects');
+            },
+            child: const Text("OK"),
+          )
+        ],
+      ),
+    );
   }
 }

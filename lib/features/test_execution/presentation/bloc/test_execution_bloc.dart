@@ -31,14 +31,16 @@ class TestExecutionBloc extends Bloc<TestExecutionEvent, TestExecutionState> {
       Emitter<TestExecutionState> emit,
       ) async {
     emit(const TestExecutionState.loading());
+    final result = await getAllProjectsUseCase(NoParams());
 
-    (await getAllProjectsUseCase(NoParams())).fold(
+    result.fold(
           (f) => emit(TestExecutionState.failure(
         errorMessage: f.message ?? 'Nie udało się pobrać projektów',
       )),
           (projects) => emit(TestExecutionState.success(
         projects: projects,
         structure: null,
+        exportFilePath: null,
       )),
     );
   }
@@ -48,11 +50,15 @@ class TestExecutionBloc extends Bloc<TestExecutionEvent, TestExecutionState> {
       Emitter<TestExecutionState> emit,
       ) async {
     final prevProjects = state.maybeWhen(
-      success: (projects, _) => projects,
+      success: (projects, _, __) => projects,
       orElse: () => const <ProjectEntity>[],
     );
 
-    emit(const TestExecutionState.loading());
+    emit(TestExecutionState.success(
+      projects: prevProjects,
+      structure: null,
+      exportFilePath: null,
+    ));
 
     final result = await getProjectStructure(event.projectId);
 
@@ -63,17 +69,18 @@ class TestExecutionBloc extends Bloc<TestExecutionEvent, TestExecutionState> {
           (structure) => emit(TestExecutionState.success(
         projects: prevProjects,
         structure: structure,
+        exportFilePath: null,
       )),
     );
   }
-
-
 
   Future<void> _onUpdateStepTempStatus(
       UpdateStepTempStatusEvent event,
       Emitter<TestExecutionState> emit,
       ) async {
-    (await updateStepTempStatus(event.stepStatus)).fold(
+    final result = await updateStepTempStatus(event.stepStatus);
+
+    result.fold(
           (f) => emit(TestExecutionState.failure(
         errorMessage: f.message ?? 'Błąd zmiany statusu kroku testowego',
       )),
@@ -87,12 +94,22 @@ class TestExecutionBloc extends Bloc<TestExecutionEvent, TestExecutionState> {
       ) async {
     emit(const TestExecutionState.loading());
 
-    (await exportToFile(NoParams())).fold(
+    final result = await exportToFile(NoParams());
+
+    final prev = state.maybeWhen(
+      success: (projects, structure, _) => (projects, structure),
+      loading: () => (<ProjectEntity>[], null),
+      orElse: () => (<ProjectEntity>[], null),
+    );
+
+    result.fold(
           (f) => emit(TestExecutionState.failure(
         errorMessage: f.message ?? 'Nie udało się wyeksportować danych',
       )),
-          (filePath) => emit(TestExecutionState.failure(
-        errorMessage: 'Plik zapisano: $filePath',
+          (filePath) => emit(TestExecutionState.success(
+        projects: prev.$1,
+        structure: prev.$2,
+        exportFilePath: filePath,
       )),
     );
   }

@@ -125,12 +125,12 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<ProjectEntity> projects,  ProjectStructureEntity? structure)?  success,TResult Function( String errorMessage)?  failure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<ProjectEntity> projects,  ProjectStructureEntity? structure,  String? exportFilePath)?  success,TResult Function( String errorMessage)?  failure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case TestExecutionInitial() when initial != null:
 return initial();case TestExecutionLoading() when loading != null:
 return loading();case TestExecutionSuccess() when success != null:
-return success(_that.projects,_that.structure);case TestExecutionFailure() when failure != null:
+return success(_that.projects,_that.structure,_that.exportFilePath);case TestExecutionFailure() when failure != null:
 return failure(_that.errorMessage);case _:
   return orElse();
 
@@ -149,12 +149,12 @@ return failure(_that.errorMessage);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<ProjectEntity> projects,  ProjectStructureEntity? structure)  success,required TResult Function( String errorMessage)  failure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<ProjectEntity> projects,  ProjectStructureEntity? structure,  String? exportFilePath)  success,required TResult Function( String errorMessage)  failure,}) {final _that = this;
 switch (_that) {
 case TestExecutionInitial():
 return initial();case TestExecutionLoading():
 return loading();case TestExecutionSuccess():
-return success(_that.projects,_that.structure);case TestExecutionFailure():
+return success(_that.projects,_that.structure,_that.exportFilePath);case TestExecutionFailure():
 return failure(_that.errorMessage);}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -169,12 +169,12 @@ return failure(_that.errorMessage);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<ProjectEntity> projects,  ProjectStructureEntity? structure)?  success,TResult? Function( String errorMessage)?  failure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<ProjectEntity> projects,  ProjectStructureEntity? structure,  String? exportFilePath)?  success,TResult? Function( String errorMessage)?  failure,}) {final _that = this;
 switch (_that) {
 case TestExecutionInitial() when initial != null:
 return initial();case TestExecutionLoading() when loading != null:
 return loading();case TestExecutionSuccess() when success != null:
-return success(_that.projects,_that.structure);case TestExecutionFailure() when failure != null:
+return success(_that.projects,_that.structure,_that.exportFilePath);case TestExecutionFailure() when failure != null:
 return failure(_that.errorMessage);case _:
   return null;
 
@@ -251,7 +251,7 @@ String toString() {
 
 
 class TestExecutionSuccess implements TestExecutionState {
-  const TestExecutionSuccess({required final  List<ProjectEntity> projects, this.structure}): _projects = projects;
+  const TestExecutionSuccess({required final  List<ProjectEntity> projects, this.structure, this.exportFilePath}): _projects = projects;
   
 
  final  List<ProjectEntity> _projects;
@@ -262,6 +262,7 @@ class TestExecutionSuccess implements TestExecutionState {
 }
 
  final  ProjectStructureEntity? structure;
+ final  String? exportFilePath;
 
 /// Create a copy of TestExecutionState
 /// with the given fields replaced by the non-null parameter values.
@@ -273,16 +274,16 @@ $TestExecutionSuccessCopyWith<TestExecutionSuccess> get copyWith => _$TestExecut
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TestExecutionSuccess&&const DeepCollectionEquality().equals(other._projects, _projects)&&(identical(other.structure, structure) || other.structure == structure));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TestExecutionSuccess&&const DeepCollectionEquality().equals(other._projects, _projects)&&(identical(other.structure, structure) || other.structure == structure)&&(identical(other.exportFilePath, exportFilePath) || other.exportFilePath == exportFilePath));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_projects),structure);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_projects),structure,exportFilePath);
 
 @override
 String toString() {
-  return 'TestExecutionState.success(projects: $projects, structure: $structure)';
+  return 'TestExecutionState.success(projects: $projects, structure: $structure, exportFilePath: $exportFilePath)';
 }
 
 
@@ -293,7 +294,7 @@ abstract mixin class $TestExecutionSuccessCopyWith<$Res> implements $TestExecuti
   factory $TestExecutionSuccessCopyWith(TestExecutionSuccess value, $Res Function(TestExecutionSuccess) _then) = _$TestExecutionSuccessCopyWithImpl;
 @useResult
 $Res call({
- List<ProjectEntity> projects, ProjectStructureEntity? structure
+ List<ProjectEntity> projects, ProjectStructureEntity? structure, String? exportFilePath
 });
 
 
@@ -310,11 +311,12 @@ class _$TestExecutionSuccessCopyWithImpl<$Res>
 
 /// Create a copy of TestExecutionState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? projects = null,Object? structure = freezed,}) {
+@pragma('vm:prefer-inline') $Res call({Object? projects = null,Object? structure = freezed,Object? exportFilePath = freezed,}) {
   return _then(TestExecutionSuccess(
 projects: null == projects ? _self._projects : projects // ignore: cast_nullable_to_non_nullable
 as List<ProjectEntity>,structure: freezed == structure ? _self.structure : structure // ignore: cast_nullable_to_non_nullable
-as ProjectStructureEntity?,
+as ProjectStructureEntity?,exportFilePath: freezed == exportFilePath ? _self.exportFilePath : exportFilePath // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

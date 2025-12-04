@@ -27,7 +27,7 @@ class TestStepBloc extends Bloc<TestStepEvent, TestStepState> {
     required this.updateTestStep,
     required this.deleteTestStep,
     required this.updateTestStepOrder,
-    required this.recalcProgress
+    required this.recalcProgress,
   }) : super(const TestStepState.initial()) {
     on<GetTestStepsForCaseEvent>(_onGet);
     on<CreateTestStepEvent>(_onCreate);
@@ -46,11 +46,13 @@ class TestStepBloc extends Bloc<TestStepEvent, TestStepState> {
       getTestStepsForCase(event.testCaseId),
       onData: (either) => either.fold(
             (f) => TestStepState.failure(
-            errorMessage: f.message ?? "Błąd pobierania kroków"),
+          errorMessage: f.message ?? "Błąd pobierania kroków",
+        ),
             (steps) => TestStepState.success(steps: steps),
       ),
-      onError: (err, _) =>
-          TestStepState.failure(errorMessage: err.toString()),
+      onError: (err, _) => TestStepState.failure(
+        errorMessage: err.toString(),
+      ),
     );
   }
 
@@ -66,9 +68,10 @@ class TestStepBloc extends Bloc<TestStepEvent, TestStepState> {
           (f) => emit(TestStepState.failure(
         errorMessage: f.message ?? 'Nie udało się dodać kroku',
       )),
-          (_) => add(TestStepEvent.getTestStepsForCase(
-        testCaseId: event.step.testCaseId,
-      )),
+          (_) async {
+        await recalcProgress(event.step.testCaseId);
+        add(GetTestStepsForCaseEvent(testCaseId: event.step.testCaseId));
+      },
     );
   }
 
@@ -84,9 +87,10 @@ class TestStepBloc extends Bloc<TestStepEvent, TestStepState> {
           (f) => emit(TestStepState.failure(
         errorMessage: f.message ?? 'Nie udało się zaktualizować kroku',
       )),
-          (_) => add(TestStepEvent.getTestStepsForCase(
-        testCaseId: event.step.testCaseId,
-      )),
+          (_) async {
+        await recalcProgress(event.step.testCaseId);
+        add(GetTestStepsForCaseEvent(testCaseId: event.step.testCaseId));
+      },
     );
   }
 
@@ -102,9 +106,10 @@ class TestStepBloc extends Bloc<TestStepEvent, TestStepState> {
           (f) => emit(TestStepState.failure(
         errorMessage: f.message ?? 'Nie udało się usunąć kroku',
       )),
-          (_) => add(TestStepEvent.getTestStepsForCase(
-        testCaseId: event.testCaseId,
-      )),
+          (_) async {
+        await recalcProgress(event.testCaseId);
+        add(GetTestStepsForCaseEvent(testCaseId: event.testCaseId));
+      },
     );
   }
 
@@ -120,9 +125,11 @@ class TestStepBloc extends Bloc<TestStepEvent, TestStepState> {
           (f) => emit(TestStepState.failure(
         errorMessage: f.message ?? 'Nie udało się zmienić kolejności',
       )),
-          (_) => add(TestStepEvent.getTestStepsForCase(
-        testCaseId: event.testCaseId,
-      )),
+          (_) async {
+        await recalcProgress(event.testCaseId);
+        add(GetTestStepsForCaseEvent(testCaseId: event.testCaseId));
+      },
     );
   }
 }
+

@@ -47,11 +47,87 @@ class _ProjectListPageState extends State<ProjectListPage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: const Text('Projects')),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _openCreateProjectForm,
-          child: const Icon(Icons.add),
+        appBar: AppBar(
+          backgroundColor: Colors.white.withOpacity(0.06),
+          elevation: 0,
+          centerTitle: true,
+          title: const Text(
+            'Projects',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              letterSpacing: 0.5,
+            ),
+          ),
+
+          // LEADING: powrót
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+            onPressed: () => context.pop(),
+          ),
+
+          actions: [
+            /// ▶ START TEST EXECUTION
+            Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: GestureDetector(
+                onTap: () => context.go('/execution'),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.greenAccent,
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.greenAccent.withOpacity(0.4),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.play_arrow_rounded,
+                    color: Colors.black,
+                    size: 22,
+                  ),
+                ),
+              ),
+            ),
+
+            /// ➕ ADD PROJECT
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: GestureDetector(
+                onTap: _openCreateProjectForm,
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.amberAccent,
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.amberAccent.withOpacity(0.4),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.add_rounded,
+                    color: Colors.black,
+                    size: 22,
+                  ),
+                ),
+              ),
+            ),
+          ],
+
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(26)),
+          ),
         ),
+
         body: BlocBuilder<ProjectBloc, ProjectState>(
           builder: (context, state) {
             return state.when(
@@ -123,16 +199,6 @@ class _ProjectListPageState extends State<ProjectListPage> {
               itemBuilder: (context, index) {
                 return ProjectTile(project: projects[index]);
               },
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => context.go('/execution'),
-              child: const Text('Start Test Execution'),
             ),
           ),
         ),

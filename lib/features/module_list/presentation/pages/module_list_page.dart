@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:test_plan_manager_app/core/UI/app_colors.dart';
 import 'package:test_plan_manager_app/features/module_list/data/models/visited_module.dart';
 
 import '../bloc/module_bloc.dart';
@@ -38,19 +39,97 @@ class _ModuleListPageState extends State<ModuleListPage> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.white.withOpacity(0.06),
+          elevation: 0,
+          centerTitle: true,
           title: Text(
             context.watch<ModuleBloc>().state.maybeWhen(
               success: (_, __, ___, ____, _____, projectName) =>
               projectName ?? widget.projectName,
               orElse: () => widget.projectName,
             ),
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              letterSpacing: 0.5,
+            ),
           ),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
             onPressed: () => _onBackPressed(context),
           ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: GestureDetector(
+                onTapDown: (details) {
+                  final position = RelativeRect.fromLTRB(
+                    details.globalPosition.dx,
+                    details.globalPosition.dy,
+                    MediaQuery.of(context).size.width - details.globalPosition.dx,
+                    0,
+                  );
+
+                  showMenu(
+                    context: context,
+                    position: position,
+                    color: AppColors.softViolet.withOpacity(0.92),
+                    items: [
+                      const PopupMenuItem(
+                        value: 'add_module',
+                        child: Text(
+                          "➕ Dodaj moduł",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      if (widget.moduleId != null)
+                        const PopupMenuItem(
+                          value: 'add_plan',
+                          child: Text(
+                            "📄 Dodaj plan testów",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        )
+                    ],
+                  ).then((value) {
+                    if (value == 'add_module') _openCreateModuleDialog(context);
+                    if (value == 'add_plan') _openCreatePlanDialog(context);
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.warmBeige,
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.warmBeige.withOpacity(0.4),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.add_rounded,
+                    color: AppColors.darkNavy,
+                    size: 22,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+          ],
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(26),
+            ),
+          ),
         ),
-        floatingActionButton: _buildFab(context),
         body: BlocBuilder<ModuleBloc, ModuleState>(
           builder: (context, state) {
             return state.when(
@@ -101,11 +180,28 @@ class _ModuleListPageState extends State<ModuleListPage> {
       children: [
         buildPathBar(context, visited, widget.projectId),
         Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           child: TextField(
-            decoration: const InputDecoration(
-              labelText: 'Szukaj modułu lub planu testów',
-              prefixIcon: Icon(Icons.search),
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              hintText: "Szukaj modułu lub planu testów",
+              hintStyle: TextStyle(color: Colors.white.withOpacity(0.65)),
+              prefixIcon: Icon(Icons.search_rounded, color: Colors.white.withOpacity(0.9)),
+              filled: true,
+              fillColor: Colors.white.withOpacity(0.10),
+              contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(18),
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.25)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(18),
+                borderSide: const BorderSide(color: AppColors.warmBeige, width: 1.7),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(18),
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
+              ),
             ),
             onChanged: (v) => setState(() => searchQuery = v),
           ),
@@ -156,30 +252,6 @@ class _ModuleListPageState extends State<ModuleListPage> {
     context.go(
       '/modules/${widget.projectId}/sub/${parent.id}',
       extra: widget.projectName,
-    );
-  }
-
-  Widget _buildFab(BuildContext context) {
-    return PopupMenuButton<String>(
-      icon: const Icon(Icons.add),
-      onSelected: (value) {
-        if (value == 'add_module') {
-          _openCreateModuleDialog(context);
-        } else if (value == 'add_plan' && widget.moduleId != null) {
-          _openCreatePlanDialog(context);
-        }
-      },
-      itemBuilder: (context) => [
-        const PopupMenuItem(
-          value: 'add_module',
-          child: Text('Dodaj moduł'),
-        ),
-        if (widget.moduleId != null)
-          const PopupMenuItem(
-            value: 'add_plan',
-            child: Text('Dodaj plan testów'),
-          ),
-      ],
     );
   }
 

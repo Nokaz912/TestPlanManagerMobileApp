@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:test_plan_manager_app/core/UI/app_colors.dart';
 import 'package:test_plan_manager_app/features/module_list/data/models/visited_module.dart';
 
 import '../bloc/module_bloc.dart';
@@ -79,85 +80,121 @@ class _ModuleTileState extends State<ModuleTile> {
       ...plans.map((p) => PreviewItem(name: p.name)),
     ].take(3).toList();
 
-    final description = m.description;
-
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-      elevation: 2.0,
+      color: AppColors.softViolet.withOpacity(0.25),
+      elevation: 3,
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(18),
         onTap: _togglePreview,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+          padding: const EdgeInsets.all(14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
+                  Icon(
+                    Icons.folder_special_rounded,
+                    color: AppColors.warmBeige,
+                    size: 34,
+                  ),
+
+                  const SizedBox(width: 14),
+
                   Expanded(
                     child: Text(
                       m.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.0,
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
                       ),
                     ),
                   ),
+
                   PopupMenuButton<String>(
-                    onSelected: (v) {
-                      if (v == 'edit') _openEditDialog(context);
-                      if (v == 'delete') _confirmDelete(context);
+                    color: AppColors.softViolet.withOpacity(0.9),
+                    icon: const Icon(Icons.more_vert, color: Colors.white),
+                    onSelected: (value) {
+                      if (value == 'edit') _openEditDialog(context);
+                      if (value == 'delete') _confirmDelete(context);
                     },
-                    itemBuilder: (context) => const [
+                    itemBuilder: (_) => const [
                       PopupMenuItem(
                         value: 'edit',
-                        child: Text('Edytuj'),
+                        child: Text("✏️ Edytuj", style: TextStyle(color: Colors.white)),
                       ),
                       PopupMenuItem(
                         value: 'delete',
-                        child: Text('Usuń'),
+                        child: Text("🗑 Usuń", style: TextStyle(color: Colors.white)),
                       ),
                     ],
                   ),
+
                   IconButton(
-                    icon: const Icon(Icons.chevron_right),
+                    icon: const Icon(Icons.chevron_right, color: Colors.white),
                     onPressed: () => _openModule(context),
-                    splashRadius: 22.0,
-                  ),
+                    splashRadius: 20,
+                  )
                 ],
               ),
-              if (description != null && description.isNotEmpty)
+
+              if (m.description != null && m.description!.isNotEmpty)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 4.0),
+                  padding: const EdgeInsets.only(top: 4, left: 4),
                   child: Text(
-                    description,
+                    m.description!,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.black54),
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                      color: Colors.white70,
+                    ),
                   ),
                 ),
+
               AnimatedCrossFade(
-                duration: const Duration(milliseconds: 200),
-                crossFadeState: _isExpanded
-                    ? CrossFadeState.showSecond
-                    : CrossFadeState.showFirst,
+                duration: const Duration(milliseconds: 260),
+                crossFadeState:
+                _isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
                 firstChild: const SizedBox.shrink(),
-                secondChild: Padding(
-                  padding: const EdgeInsets.only(left: 22.0, top: 6.0, bottom: 6.0),
+                secondChild: Container(
+                  margin: const EdgeInsets.only(left: 8, top: 8, bottom: 4),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.16),
+                    ),
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ...previewItems.map(
-                            (item) => GestureDetector(
-                          onTap: () => _openModule(context),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 2.0),
-                            child: Text(
-                              '• ${item.name}',
-                              style: const TextStyle(fontSize: 13.0),
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                            (item) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.circle,
+                                size: 7,
+                                color: Colors.white.withOpacity(0.8),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  item.name,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              )
+                            ],
                           ),
                         ),
                       ),
@@ -166,13 +203,19 @@ class _ModuleTileState extends State<ModuleTile> {
                           onPressed: () => _openModule(context),
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.zero,
+                            foregroundColor: Colors.white.withOpacity(0.9),
                           ),
-                          child: const Text('Zobacz więcej'),
+                          child: const Text(
+                            'Zobacz więcej →',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                     ],
                   ),
                 ),
-              ),
+              )
             ],
           ),
         ),
@@ -187,7 +230,8 @@ class _ModuleTileState extends State<ModuleTile> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Edytuj moduł'),
+        backgroundColor: AppColors.softViolet.withOpacity(0.95),
+        title: const Text("Edytuj moduł", style: TextStyle(color: Colors.white)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -204,7 +248,7 @@ class _ModuleTileState extends State<ModuleTile> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Anuluj'),
+            child: const Text("Anuluj", style: TextStyle(color: Colors.white)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -218,12 +262,12 @@ class _ModuleTileState extends State<ModuleTile> {
                 parentModuleId: widget.module.parentModuleId,
               );
 
-              context.read<ModuleBloc>().add(
-                ModuleEvent.updateModule(module: updated),
-              );
+              context
+                  .read<ModuleBloc>()
+                  .add(ModuleEvent.updateModule(module: updated));
               Navigator.pop(ctx);
             },
-            child: const Text('Zapisz'),
+            child: const Text("Zapisz"),
           ),
         ],
       ),
@@ -234,21 +278,25 @@ class _ModuleTileState extends State<ModuleTile> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Usuń moduł'),
-        content: Text('Czy na pewno chcesz usunąć „${widget.module.name}”?'),
+        backgroundColor: AppColors.softViolet.withOpacity(0.95),
+        title: const Text("Usuń moduł", style: TextStyle(color: Colors.white)),
+        content: Text(
+          'Czy na pewno chcesz usunąć „${widget.module.name}”?',
+          style: const TextStyle(color: Colors.white),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Anuluj'),
+            child: const Text("Anuluj", style: TextStyle(color: Colors.white)),
           ),
           ElevatedButton(
             onPressed: () {
-              context.read<ModuleBloc>().add(
-                ModuleEvent.deleteModule(moduleId: widget.module.id),
-              );
+              context
+                  .read<ModuleBloc>()
+                  .add(ModuleEvent.deleteModule(moduleId: widget.module.id));
               Navigator.pop(ctx);
             },
-            child: const Text('Usuń'),
+            child: const Text("Usuń"),
           ),
         ],
       ),

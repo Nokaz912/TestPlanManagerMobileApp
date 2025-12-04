@@ -13,6 +13,7 @@ sealed class TestExecutionState with _$TestExecutionState {
   const factory TestExecutionState.success({
     required List<ProjectEntity> projects,
     ProjectStructureEntity? structure,
+    String? exportFilePath,
   }) = TestExecutionSuccess;
 
   const factory TestExecutionState.failure({

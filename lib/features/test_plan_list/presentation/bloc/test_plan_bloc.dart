@@ -46,7 +46,6 @@ class TestPlanBloc extends Bloc<TestPlanEvent, TestPlanState> {
       Emitter<TestPlanState> emit,
       ) async {
     await createTestCase(CreateTestCaseParams(event.testCase));
-    // STREAM sam zaktualizuje listę
   }
 
   Future<void> _updateCase(
