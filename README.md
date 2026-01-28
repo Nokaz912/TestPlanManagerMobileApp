@@ -1,16 +1,18 @@
-# test_plan_manager_app
+TestPlan Manager
+Aplikacja mobilna do zarządzania planami testowymi, zintegrowana z Microsoft Lists. Projekt skupia się na implementacji Clean Architecture oraz pracy w trybie offline.
 
-App for testers
+Opis techniczny: Aplikacja została zbudowana w oparciu o podział na warstwy (Presentation, Domain, Data), co zapewnia separację logiki biznesowej od UI i źródeł danych. Komunikacja z API Microsoft Lists odbywa się poprzez REST, a pobrane dane są cache'owane w lokalnej bazie danych, co umożliwia pełną funkcjonalność bez dostępu do sieci.
 
-## Getting Started
+Wykorzystane technologie i wzorce:
 
-This project is a starting point for a Flutter application.
+Flutter & Dart
 
-A few resources to get you started if this is your first Flutter project:
+Clean Architecture – pełna separacja warstw.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+State Management – BLoC / Cubit do zarządzania stanem aplikacji.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Code Generation – freezed do generowania niemutowalnych modeli i stanów (Unions) oraz json_serializable do deserializacji danych z API.
+
+API Integration – obsługa REST API Microsoft Lists (autoryzacja, parsowanie JSON).
+
+Offline Data – lokalna baza danych służąca jako cache dla danych zewnętrznych.
